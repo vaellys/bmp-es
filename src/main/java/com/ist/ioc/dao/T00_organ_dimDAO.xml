@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ist.ioc.dao.T00_organ_dimDao">
+	
+	<!--根据机构key查询机构层次 -->
+	<select id="getOrganDimByOrgankeys" parameterType="java.lang.String" resultType="java.util.HashMap">
+		select 
+		    level_code_0,
+		    level_code_1,
+		    level_code_2,
+		    level_code_3,
+		    organname,
+		    organkey
+		 from  t00_organ_dim where organkey in 
+		 <foreach collection="list" item="organkey" separator="," open="(" close=")">
+     	 #{organkey}
+    	 </foreach>
+	</select>
+	
+</mapper>

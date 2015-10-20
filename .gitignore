@@ -1,0 +1,6 @@
+target/
+bmp-logs/
+.project
+.settings/
+.sonar/
+sonar-project.properties

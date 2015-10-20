@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ist.ioc.dao.Bmp_user_organ_authorityDao">
+	
+	<!--根据用户名查询对应的机构列表 -->
+	<select id="getBmpOrganKeysByUsername" parameterType="java.lang.String" resultType="java.lang.String">
+		select organkey from  bmp_user_organ_authority where username=#{username}
+	</select>
+	
+</mapper>
