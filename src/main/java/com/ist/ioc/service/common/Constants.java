@@ -71,4 +71,23 @@ public class Constants{
     public static final String ES_FIELD_EN = "en";
     public static final String ES_FIELD_PATH = "path";
     
+    /**
+     * 查询得分定义
+     */
+    public static final String ES_SCORE = "score";
+    //完全匹配
+    public static final int ES_SCORE_PERFECT_MATCH = 100;
+    //slop=1
+    public static final int ES_SCORE_MATCH_SLOP_1 = 98;
+    //slop=2
+    public static final int ES_SCORE_MATCH_SLOP_2 = 95;
+    //slop=3
+    public static final int ES_SCORE_MATCH_SLOP_3 = 90;
+    //查询字符串
+    public static final int ES_SCORE_MATCH_QUERY_STR = 80;
+    //模糊查询
+    public static final int ES_SCORE_MATCH_FUZZY = 60;
+    //完全不匹配
+    public static final int ES_SCORE_NOT_MUST_MATCH = 0;
+    
 }

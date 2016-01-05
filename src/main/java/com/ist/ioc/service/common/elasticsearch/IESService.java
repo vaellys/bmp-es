@@ -156,4 +156,25 @@ public interface IESService {
 
     public Pagination documentSearchWithSuggestion(List<String> indexNames, List<String> indexTypes, List<String> queryFields, String keywords,
             Integer pageNow, Integer pageSize) throws IOException;
+
+    public Pagination documentSearchWithTerm(List<String> indexNames, List<String> indexTypes, String queryField, String keywords, Integer pageNow,
+            Integer pageSize) throws IOException;
+
+    Pagination documentSearchWithMatch(List<String> indexNames, List<String> indexTypes, String queryField, String keywords, Integer pageNow,
+            Integer pageSize) throws IOException;
+
+    Pagination documentSearchWithFunctionScore(List<String> indexNames, List<String> indexTypes, List<String> queryFields, String keywords,
+            Integer pageNow, Integer pageSize) throws IOException;
+
+    Map<String, Object> documentSearchWithMatchPhrase(String indexName, String indexType, String queryFields, List<String> hlFields,
+            String keywords, Integer pageNow, Integer pageSize) throws IOException;
+
+    Map<String, Object> documentSearchWithFuzzy(String indexName, String indexType, String queryField, List<String> hlFields, String keywords,
+            Integer pageNow, Integer pageSize) throws IOException;
+
+    Map<String, Object> documentSearchWithMultiMatch(String indexName, String indexType, String[] queryFields, List<String> hlFields, String keywords,
+            Integer pageNow, Integer pageSize) throws IOException;
+
+    List<Map<String, Object>> documentSearchWithCustomerScore(String indexName, String indexType, List<String> queryFields, List<String> hlFields,
+            String keywords, Integer pageNow, Integer pageSize) throws IOException;
 }

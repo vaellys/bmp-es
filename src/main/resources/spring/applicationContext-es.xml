@@ -11,13 +11,15 @@
             http://www.springframework.org/schema/context/spring-context-3.0.xsd">
 
 
+<context:annotation-config />
     <!-- 注入properties配置到Spring中 -->
     <bean id="propertyConfigurer"
         class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
         <property name="ignoreResourceNotFound" value="true"></property>
         <property name="locations">
             <list>
-                <value>classpath:/es-config.properties</value>
+                <value>classpath*:/es-config.properties</value>
+                <value>classpath*:/mapping-config.properties</value>
             </list>
         </property>
     </bean>
@@ -50,7 +52,15 @@
 
     <!-- 获取jest客户端 -->
     <bean id="jestClient" factory-bean="jestClientFactory"
-        factory-method="getObject" />
+        factory-method="getObject" scope="prototype"/>
+        
+    <bean id="pooledObjectFactory" class="com.ist.assemble.PooledObjectFactory"></bean>
+    
+    <bean id="genericObjectPool" class="org.apache.commons.pool.impl.GenericObjectPool">
+        <constructor-arg index="0" ref="pooledObjectFactory"/>
+        <!-- 最大闲置对象 -->
+        <constructor-arg index="1" value="8"/>
+    </bean>
     
     <!-- 配置分片和副本分片数量 begin-->   
     <bean id="customImmutableSetting" class="com.ist.assemble.CustomImmutableSetting" scope="singleton">
@@ -60,6 +70,7 @@
                 <entry key="number_of_replicas" value="${es.number_of_replicas}"></entry>
             </map>
         </property>
+        <property name="mappingStr" value="${es.mapping}"></property>
     </bean>
     <!-- 配置分片和副本分片数量 end-->
     

@@ -13,6 +13,7 @@ public class CustomImmutableSetting {
     
 	private Map<String, String> settings = new LinkedHashMap<String, String>();
 	private Builder builder;
+	private String mappingStr;
 	
 	public CustomImmutableSetting(){
 		this.builder = ImmutableSettings.builder();
@@ -26,4 +27,11 @@ public class CustomImmutableSetting {
 	public Builder getBuilder() {
 		return builder;
 	}
+    public String getMappingStr() {
+        return mappingStr;
+    }
+    public void setMappingStr(String mappingStr) {
+        this.mappingStr = mappingStr;
+    }
+	
 }
