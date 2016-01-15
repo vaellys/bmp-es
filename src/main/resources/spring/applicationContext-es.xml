@@ -12,6 +12,7 @@
 
 
 <context:annotation-config />
+
     <!-- 注入properties配置到Spring中 -->
     <bean id="propertyConfigurer"
         class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
@@ -139,4 +140,5 @@
             </list>
         </property>
      </bean>      -->
+     
 </beans>

@@ -34,7 +34,8 @@ public class XMLProperties {
 	protected Document doc;
 	private String flag = "#";
 
-	private Map propertyCache = new HashMap();
+	@SuppressWarnings("rawtypes")
+    private Map propertyCache = new HashMap();
 
 	public XMLProperties(Resource _configLocation) {
 		try {
@@ -52,7 +53,8 @@ public class XMLProperties {
 		}
 	}
 
-	public String getProperty(String name) {
+	@SuppressWarnings("unchecked")
+    public String getProperty(String name) {
 		if (this.propertyCache.containsKey(name)) {
 			return (String) this.propertyCache.get(name);
 		}
@@ -78,7 +80,8 @@ public class XMLProperties {
 		return value;
 	}
 
-	public String[] getChildrenProperties(String parent) {
+	@SuppressWarnings("rawtypes")
+    public String[] getChildrenProperties(String parent) {
 		String[] propName = parsePropertyName(parent);
 
 		Element element = this.doc.getRootElement();
@@ -98,7 +101,8 @@ public class XMLProperties {
 		return childrenNames;
 	}
 
-	public void setProperty(String name, String value) {
+	@SuppressWarnings("unchecked")
+    public void setProperty(String name, String value) {
 		this.propertyCache.put(name, value);
 
 		String[] propName = parsePropertyName(name);
@@ -196,16 +200,18 @@ public class XMLProperties {
 	}
 
 	public void setConfigLocation(Resource configLocation) {
-		configLocation = configLocation;
+		this.configLocation = configLocation;
 	}
 
-	public int getChildrenCount(String path) {
+	@SuppressWarnings("rawtypes")
+    public int getChildrenCount(String path) {
 		Element element = getElement(path);
 		List list = element.getChildren();
 		return list.isEmpty() ? 0 : list.size();
 	}
 
-	private void getElementList(List<Element> nodeList, Element root, String elementName) {
+	@SuppressWarnings("rawtypes")
+    private void getElementList(List<Element> nodeList, Element root, String elementName) {
 		if (root.getName().equals(elementName)) {
 			nodeList.add(root);
 		} else {
@@ -219,7 +225,8 @@ public class XMLProperties {
 		}
 	}
 
-	private Element getElement(String path) {
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+    private Element getElement(String path) {
 		String[] propName = parsePropertyName(path);
 		Element element = this.doc.getRootElement();
 
@@ -264,7 +271,8 @@ public class XMLProperties {
 		return value;
 	}
 
-	public String getArrayProperty(String name) {
+	@SuppressWarnings("unchecked")
+    public String getArrayProperty(String name) {
 		if (this.propertyCache.containsKey(name)) {
 			return (String) this.propertyCache.get(name);
 		}

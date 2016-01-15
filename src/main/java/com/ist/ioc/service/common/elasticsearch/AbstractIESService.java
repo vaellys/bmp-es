@@ -1,6 +1,28 @@
 package com.ist.ioc.service.common.elasticsearch;
 
-import static com.ist.ioc.service.common.Constants.*;
+import static com.ist.ioc.service.common.Constants.ES_ADD_ACTION;
+import static com.ist.ioc.service.common.Constants.ES_DELETE_ACTION;
+import static com.ist.ioc.service.common.Constants.ES_ENGLISH;
+import static com.ist.ioc.service.common.Constants.ES_FIELD_CONTENT;
+import static com.ist.ioc.service.common.Constants.ES_FIELD_DESCRIPTION;
+import static com.ist.ioc.service.common.Constants.ES_FIELD_EN;
+import static com.ist.ioc.service.common.Constants.ES_FIELD_NAME;
+import static com.ist.ioc.service.common.Constants.ES_FIELD_PATH;
+import static com.ist.ioc.service.common.Constants.ES_FIELD_PY;
+import static com.ist.ioc.service.common.Constants.ES_FIELD_TITLE;
+import static com.ist.ioc.service.common.Constants.ES_IK;
+import static com.ist.ioc.service.common.Constants.ES_INDEX_CREATE_TIME;
+import static com.ist.ioc.service.common.Constants.ES_PAGE_ID;
+import static com.ist.ioc.service.common.Constants.ES_PAGE_SIZE;
+import static com.ist.ioc.service.common.Constants.ES_PINYIN_ANALYZER;
+import static com.ist.ioc.service.common.Constants.ES_RESULT;
+import static com.ist.ioc.service.common.Constants.ES_RESULT_KEY;
+import static com.ist.ioc.service.common.Constants.ES_SCORE;
+import static com.ist.ioc.service.common.Constants.ES_T2S_CONVERT;
+import static com.ist.ioc.service.common.Constants.ES_TOTAL_PAGE;
+import static com.ist.ioc.service.common.Constants.ES_TOTAL_SIZE;
+import static com.ist.ioc.service.common.Constants.ES_UPDATE_ACTION;
+import static com.ist.ioc.service.common.Constants.ES_UPDATE_DOC;
 import io.searchbox.client.JestClient;
 import io.searchbox.client.JestResult;
 import io.searchbox.core.Bulk;
@@ -63,13 +85,11 @@ import org.elasticsearch.index.query.functionscore.FunctionScoreQueryBuilder;
 import org.elasticsearch.index.query.functionscore.ScoreFunctionBuilder;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.highlight.HighlightBuilder;
-import org.elasticsearch.search.sort.SortOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.wltea.analyzer.lucene.IKAnalyzer;
 
 import com.ist.assemble.CustomImmutableSetting;
 import com.ist.common.es.util.DateUtils;
-import com.ist.common.es.util.JsonUtils;
 import com.ist.common.es.util.LogUtils;
 import com.ist.common.es.util.page.Pagination;
 import com.ist.dto.bmp.ESDto;
@@ -121,7 +141,7 @@ public abstract class AbstractIESService implements IESService {
                     String index = StringUtils.lowerCase(key);
                     List<String> typeList = entry.getValue();
                     // 删除索引
-//                     this.deleteIndex(index, null);
+                     this.deleteIndex(index, null);
                     // 创建索引
                     this.addIndex(index);
                     if (null != typeList && !typeList.isEmpty()) {
@@ -159,7 +179,7 @@ public abstract class AbstractIESService implements IESService {
             // es库名只能是小写字母
             indexName = StringUtils.lowerCase(indexName);
             // 删除索引
-//             this.deleteIndex(indexName, null);
+             this.deleteIndex(indexName, null);
             // 创建索引
             this.addIndex(indexName);
             // 设置默认的索引名字
@@ -175,6 +195,41 @@ public abstract class AbstractIESService implements IESService {
                 builder.addAction(Arrays.asList(buildDeleteAction(documents)));
             } else if (action == ES_UPDATE_ACTION && !documents.isEmpty()) {
                 builder.addAction(Arrays.asList(buildUpdateAction(documents)));
+            }
+            builder.defaultType(indexType);
+            JestResult response = client.execute(builder.build());
+            if (response.isSucceeded()) {
+                return true;
+            } else {
+                return false;
+            }
+        } catch (IOException e) {
+            logger.error("构建索引败:" + LogUtils.format("indexName", indexName, "indexType", indexType, "documents", documents), e);
+            throw new IOException("构建索引败", e);
+        }
+    }
+	
+	public boolean documentHandlerWithDto(String indexName, String indexType, List<ESDto> documents, Integer action) throws IOException {
+        try {
+            // es库名只能是小写字母
+            indexName = StringUtils.lowerCase(indexName);
+            // 删除索引
+             this.deleteIndex(indexName, null);
+            // 创建索引
+            this.addIndex(indexName);
+            // 设置默认的索引名字
+            Bulk.Builder builder = new Bulk.Builder().defaultIndex(indexName);
+            // 创建文档
+            if (action == ES_ADD_ACTION && !documents.isEmpty()) {
+                // 创建索引映射
+                createIndexMapping(indexName, indexType);
+                // 若文档为空则只创建索引类型
+                builder.addAction(Arrays.asList(buildIndexDtoAction(documents)));
+                // 删除文档
+            } else if (action == ES_DELETE_ACTION && !documents.isEmpty()) {
+                builder.addAction(Arrays.asList(buildDeleteDtoAction(documents)));
+            } else if (action == ES_UPDATE_ACTION && !documents.isEmpty()) {
+                builder.addAction(Arrays.asList(buildUpdateDtoAction(documents)));
             }
             builder.defaultType(indexType);
             JestResult response = client.execute(builder.build());
@@ -732,9 +787,9 @@ public abstract class AbstractIESService implements IESService {
         // 设置分页
         ssb.from(Pagination.getCurrentNum(pageNow, pageSize)).size(pageSize);
         // 设置排序方式
-        ssb.sort("_score", SortOrder.DESC);
+//        ssb.sort("_score", SortOrder.DESC);
         if(isHighlight){
-            HighlightBuilder highlight = SearchSourceBuilder.highlight();
+            HighlightBuilder highlight = SearchSourceBuilder.highlight().requireFieldMatch(true).noMatchSize(10).field("content.en", 100, 1, 10);
             HighlightBuilder hlb = highlight.preTags("<b>").postTags("</b>");
             if(null != hlFields){
                 for (String field : hlFields) {
@@ -760,16 +815,18 @@ public abstract class AbstractIESService implements IESService {
      */
     private Builder getSearchBuilder(QueryBuilder queryQuery, Boolean isHighlight, Integer pageNow, Integer pageSize) {
         SearchSourceBuilder ssb = searchSourceBuilder.query(queryQuery);
+//        ssb.fields("description");
+//        ssb.fields("content");
         // 设置分页
         ssb.from(Pagination.getCurrentNum(pageNow, pageSize)).size(pageSize);
         // 设置排序方式
-        ssb.sort("_score", SortOrder.DESC);
+//        ssb.sort("_score", SortOrder.DESC);
 //        SuggestionBuilder<?> suggestion = new TermSuggestionBuilder("suggestion").field("path").text("你好").analyzer("english");
 //        ssb.suggest().addSuggestion(suggestion);
         if(isHighlight){
             HighlightBuilder highlight = SearchSourceBuilder.highlight();
-            HighlightBuilder hlb = highlight.preTags("<b>").postTags("</b>");
-            hlb.field(ES_FIELD_TITLE).field(ES_FIELD_DESCRIPTION).field(ES_FIELD_CONTENT);
+            HighlightBuilder hlb = highlight.preTags("<font color='red'>").postTags("</font>");
+            hlb.field(ES_FIELD_TITLE).field(ES_FIELD_DESCRIPTION).field(ES_FIELD_CONTENT).field("name").field("content.py").field("content.en");
             ssb.highlight(hlb);
         }
         if (logger.isDebugEnabled()) {
@@ -853,6 +910,65 @@ public abstract class AbstractIESService implements IESService {
                     List<String> titles = hl.get(ES_FIELD_TITLE);
                     List<String> des = hl.get(ES_FIELD_DESCRIPTION);
                     List<String> content = hl.get(ES_FIELD_CONTENT);
+                    List<String> contentPy = hl.get("content.py");
+                    List<String> contentEn = hl.get("content.en");
+                    List<String> name = hl.get("name");
+                    if(null != titles){
+                        source.setTitle(titles.get(0));
+                    }
+                    if(null != des){
+                        source.setDescription(des.get(0));
+                    }
+                    if(null != content){
+                        source.setContent(content.get(0));
+                        logger.debug("content: " + content.get(0));
+                    }
+                    if(null != name){
+                        source.setName(name.get(0));
+                    }
+                    if(null != contentPy){
+                        source.setContent(contentPy.get(0));
+                        logger.debug("contentPy: " + contentPy.get(0));
+                    }
+                    if(null != contentEn){
+                        source.setContent(contentEn.get(0));
+                        logger.debug("contentEn: " + contentEn.get(0));
+                    }
+                    
+                    
+                }
+                list.add(source);
+               p.setList(list);
+            }
+        }
+        return p;
+    }
+    
+    /**
+     * 查询结果处理
+     * @param result 待处理的查询结果
+     * @param pageNow 当前页
+     * @param pageSize 页大小
+     * @return Pagination 分页对象
+     */
+    protected Pagination searchResultHandlerWithField(SearchResult result, Integer pageNow, Integer pageSize){
+        logger.debug("result: " + result.getJsonString());
+        Pagination p = null;
+//        List<ESDto> list = new ArrayList<ESDto>();
+//        jsonMap = result.getJsonMap();
+        if(null != result && result.isSucceeded()){
+            p = getPagination(result, pageNow, pageSize);
+//            JsonObject jsonObject = result.
+//            JsonElement jsonElement = jsonObject.get("fields");
+          /*  for (Hit<ESDto, Void> hit : hits) {
+                ESDto source = hit.source;
+                Map<String, List<String>> hl = hit.highlight;
+                if (null != hl) {
+                    List<String> titles = hl.get(ES_FIELD_TITLE);
+                    List<String> des = hl.get(ES_FIELD_DESCRIPTION);
+                    List<String> content = hl.get(ES_FIELD_CONTENT);
+                    List<String> contentPy = hl.get("content.py");
+                    List<String> name = hl.get("name");
                     if(null != titles){
                         source.setTitle(titles.get(0));
                     }
@@ -862,11 +978,14 @@ public abstract class AbstractIESService implements IESService {
                     if(null != content){
                         source.setContent(content.get(0));
                     }
+                    if(null != name){
+                        source.setName(name.get(0));
+                    }
                     
                 }
-                list.add(source);
-               p.setList(list);
-            }
+                list.add(source);*/
+//               p.setList(list);
+//            }
         }
         return p;
     }
@@ -1055,6 +1174,16 @@ public abstract class AbstractIESService implements IESService {
         return QueryBuilders.fuzzyQuery(field, value);
     }
     /**
+     * fuzzy
+     * @param field
+     * @param value
+     * @return
+     */
+    protected FuzzyQueryBuilder fuzzyBuilder(String field, String value, Fuzziness fuzziness){
+        //fuzzy查询
+        return QueryBuilders.fuzzyQuery(field, value).fuzziness(fuzziness);
+    }
+    /**
      * match
      * @param field
      * @param value
@@ -1144,7 +1273,7 @@ public abstract class AbstractIESService implements IESService {
     }
     
     protected MatchQueryBuilder matchPhraseBuilder(String field, String value){
-        return QueryBuilders.matchPhraseQuery(value, field).slop(0);
+        return QueryBuilders.matchPhraseQuery(value, field).slop(5);
     }
     
     protected MatchQueryBuilder matchPhraseBuilder(String field, String value, int slop){
@@ -1226,10 +1355,10 @@ public abstract class AbstractIESService implements IESService {
             if (logger.isDebugEnabled()) {
                 logger.debug("indexName:" + indexName);
             }
-//            org.elasticsearch.common.settings.ImmutableSettings.Builder buildIndexSetting = this.buildIndexSetting();
+            org.elasticsearch.common.settings.ImmutableSettings.Builder buildIndexSetting = this.buildIndexSetting();
             io.searchbox.indices.CreateIndex.Builder bIndex = new CreateIndex.Builder(indexName);
-//            CreateIndex cIndex = bIndex.settings(buildIndexSetting.build().getAsMap()).build();
-            CreateIndex cIndex = bIndex.build();
+            CreateIndex cIndex = bIndex.settings(buildIndexSetting.build().getAsMap()).build();
+//            CreateIndex cIndex = bIndex.build();
             result = client.execute(cIndex);
             if (null != result && result.isSucceeded()) {
                 return true;
@@ -1250,22 +1379,21 @@ public abstract class AbstractIESService implements IESService {
      * @return
      * @throws IOException
      */
-    @SuppressWarnings("unchecked")
     public ImmutableSettings.Builder buildIndexSetting() throws IOException {
-        try {
+//        try {
             ImmutableSettings.Builder settingsBuilder = customImmutableSetting.getBuilder();
 //            XContentBuilder settings = XContentFactory.jsonBuilder().startObject().startObject("analysis").startObject("analyzer")
 //                    .startObject("pinyin_analyzer").startArray("filter").value("word_delimiter").value("nGram").endArray().startArray("tokenizer")
 //                    .value("my_pinyin").endArray().endObject().endObject().startObject("tokenizer").startObject("my_pinyin").field("type", "pinyin")
 //                    .field("first_letter", "prefix").field("padding_char", " ").endObject().endObject().endObject();
-            XContentBuilder settings = XContentFactory.jsonBuilder();
-            settingsBuilder.put(JsonUtils.jsonToObject(settings.string(), Map.class));
-            logger.debug(LogUtils.format("settings", settings.string()));
+//            XContentBuilder settings = XContentFactory.jsonBuilder();
+//            settingsBuilder.put(JsonUtils.jsonToObject(settings.string(), Map.class));
+//            logger.debug(LogUtils.format("settings", settingsBuilder));
             return settingsBuilder;
-        } catch (IOException e) {
-            logger.debug("构建索引配置失败", e);
-            throw new IOException("构建索引配置失败");
-        }
+//        } catch (IOException e) {
+//            logger.debug("构建索引配置失败", e);
+//            throw new IOException("构建索引配置失败");
+//        }
     }
 	
     /**

@@ -35,8 +35,8 @@ public class ParseDocumentUtil {
             .getLogger(ParseDocumentUtil.class);
     
     public static String getText(String path) {
-        if (path.indexOf(".") != -1) {
-            int index = path.indexOf(".");
+        if (path.lastIndexOf(".") != -1) {
+            int index = path.lastIndexOf(".");
             String suffix = path.substring(index + 1);
             String text = "";
             if (suffix.equals("xls")) {

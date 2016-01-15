@@ -89,5 +89,4 @@ public class Constants{
     public static final int ES_SCORE_MATCH_FUZZY = 60;
     //完全不匹配
     public static final int ES_SCORE_NOT_MUST_MATCH = 0;
-    
 }

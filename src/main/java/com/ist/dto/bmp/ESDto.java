@@ -24,4 +24,13 @@ public class ESDto extends BaseDto implements Serializable {
     public void setOrgankey(String organkey) {
         this.organkey = organkey;
     }
+    
+    private String contentPy;
+    public String getContentPy() {
+        return contentPy;
+    }
+    public void setContentPy(String contentPy) {
+        this.contentPy = contentPy;
+    }
+    
 }

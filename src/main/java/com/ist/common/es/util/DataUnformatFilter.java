@@ -64,6 +64,7 @@ public class DataUnformatFilter extends XMLFilterBase
      * <p>This method is especially useful if the filter failed
      * with an exception the last time through.</p>
      */
+    @SuppressWarnings("rawtypes")
     public void reset ()
     {
         state = SEEN_NOTHING;
@@ -102,6 +103,7 @@ public class DataUnformatFilter extends XMLFilterBase
      *            further down the chain raises an exception.
      * @see com.jivesoftware.sax.ContentHandler#startElement
      */
+    @SuppressWarnings("unchecked")
     public void startElement (String uri, String localName,
                               String qName, Attributes atts)
     throws SAXException
@@ -267,6 +269,7 @@ public class DataUnformatFilter extends XMLFilterBase
     ////////////////////////////////////////////////////////////////////
 
     private Object state = SEEN_NOTHING;
+    @SuppressWarnings("rawtypes")
     private Stack stateStack = new Stack();
 
     private StringBuffer whitespace = new StringBuffer();

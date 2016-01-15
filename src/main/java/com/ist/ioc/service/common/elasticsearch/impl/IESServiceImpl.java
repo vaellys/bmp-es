@@ -10,6 +10,7 @@ import static com.ist.ioc.service.common.Constants.ES_SCORE_MATCH_SLOP_3;
 import static com.ist.ioc.service.common.Constants.ES_SCORE_NOT_MUST_MATCH;
 import static com.ist.ioc.service.common.Constants.ES_SCORE_PERFECT_MATCH;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -19,8 +20,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.elasticsearch.common.unit.Fuzziness;
 import org.elasticsearch.index.query.FuzzyLikeThisQueryBuilder;
 import org.elasticsearch.index.query.FuzzyQueryBuilder;
 import org.elasticsearch.index.query.MatchAllQueryBuilder;
@@ -30,12 +33,17 @@ import org.elasticsearch.index.query.QueryStringQueryBuilder;
 import org.elasticsearch.index.query.TermQueryBuilder;
 import org.elasticsearch.index.query.functionscore.FunctionScoreQueryBuilder;
 
+import com.ist.common.es.util.FileUtils;
 import com.ist.common.es.util.LogUtils;
+import com.ist.common.es.util.ParseDocumentUtil;
 import com.ist.common.es.util.page.Pagination;
+import com.ist.dto.bmp.ESDto;
 import com.ist.ioc.service.common.elasticsearch.AbstractIESService;
 
 public class IESServiceImpl extends AbstractIESService {
     private static final Log logger = LogFactory.getLog(IESServiceImpl.class);
+    
+    private static final String FILE_UPLOAD_DIR = "c:/awp_data/upload/";
 
     @Override
     public Map<String, Object> documentSearch(List<String> indexNames, List<String> indexTypes, List<String> queryFields, List<String> hlFields, String keywords, Integer pageNow, Integer pageSize)
@@ -218,6 +226,26 @@ public class IESServiceImpl extends AbstractIESService {
     }
     
     @Override
+    public Map<String, Object> documentSearchWithFuzzy(String indexName, String indexType, String queryField, List<String> hlFields, Fuzziness fuzziness, String keywords, Integer pageNow,
+            Integer pageSize) throws IOException {
+        try {
+            if (logger.isDebugEnabled()) {
+                logger.debug("requestParams:"
+                        + LogUtils.format("indexNames", indexName, "indexTypes", indexType, "keywords", keywords, "pageNow", pageNow, "pageSize",
+                                pageSize));
+            }
+            FuzzyQueryBuilder fuzzyBuilder = this.fuzzyBuilder(queryField, keywords, fuzziness);
+            return this.documentSearch(indexName, indexType, fuzzyBuilder, true, hlFields, Pagination.cpn(pageNow), Pagination.cps(pageSize));
+        } catch (IOException e) {
+            logger.error(
+                    "搜索失败"
+                            + LogUtils.format("indexNames", indexName, "indexTypes", indexType, "keywords", keywords, "pageNow", pageNow,
+                                    "pageSize", pageSize), e);
+            throw new IOException("搜索失败", e);
+        }
+    }
+    
+    @Override
     public Map<String, Object> documentSearchWithMultiMatch(String indexName, String indexType, String[] queryFields, List<String> hlFields, String keywords, Integer pageNow,
             Integer pageSize) throws IOException {
         try {
@@ -257,7 +285,7 @@ public class IESServiceImpl extends AbstractIESService {
             List<Map<String, Object>> allFieldListWithMatchSlop1 = new ArrayList<Map<String, Object>>();
             //查询所有字段的slop为2的匹配结果列表
             List<Map<String, Object>> allFieldListWithMatchSlop2 = new ArrayList<Map<String, Object>>();
-            //查询所有字段的slop为2的匹配结果列表
+            //查询所有字段的slop为3的匹配结果列表
             List<Map<String, Object>> allFieldListWithMatchSlop3 = new ArrayList<Map<String, Object>>();
             //查询字符串进行搜索匹配
             List<Map<String, Object>> allFieldListWithQueryString = new ArrayList<Map<String, Object>>();
@@ -383,5 +411,51 @@ public class IESServiceImpl extends AbstractIESService {
             throw new IOException("搜索失败", e);
         }
     }
-
+    
+    public boolean documentHandlerWith(String indexName, String indexType, List<ESDto> documents, Integer action) throws IOException {
+        try {
+            List<ESDto> list = new ArrayList<ESDto>();
+            for (ESDto bean : documents) {
+                // 获取文件上传的目录
+//                String dir = sysConfigEs.getProperty("data.import");
+                String dir = FILE_UPLOAD_DIR;
+                String url = dir + bean.getPath();
+                String text = ParseDocumentUtil.getText(url);
+                String fileName = FileUtils.getFileNameByUrl(url);
+                bean.setDescription(text);
+                bean.setName(fileName);
+                list.add(bean);
+            }
+          return documentHandlerWithDto(indexName, indexType, documents, action);
+        } catch (IOException e) {
+            logger.error("批量生成索引失败: " + LogUtils.format("documents", documents), e);
+            throw new IOException("批量生成索引失败", e);
+        }
+    }
+    
+    @Override
+    public boolean dirHandler(String indexName, String indexType, String path, Integer action) throws IOException {
+        try {
+            List<File> listFiles = FileUtils.getListFiles(path, null);
+            List<ESDto> documents = new ArrayList<ESDto>();
+            for (File file : listFiles) {
+                String text = ParseDocumentUtil.getText(file.getAbsolutePath());
+                ESDto dto = new ESDto();
+                dto.setDescription(StringUtils.substring(text, 0, 200));
+                dto.setName(file.getName());
+                dto.setContent(text);
+                dto.setPath(file.getName());
+                documents.add(dto);
+            }
+          return documentHandlerWithDto(indexName, indexType, documents, action);
+        } catch (IOException e) {
+            logger.error("批量生成索引失败: " + LogUtils.format("", e));
+            throw new IOException("批量生成索引失败", e);
+        } catch (Exception e) {
+            logger.error("索引失败", e);
+            e.printStackTrace();
+        }
+        return false;
+    }
+    
 }

@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
+import org.elasticsearch.common.unit.Fuzziness;
+
 import com.ist.common.es.util.page.Pagination;
 import com.ist.dto.bmp.ESDto;
 
@@ -177,4 +179,10 @@ public interface IESService {
 
     List<Map<String, Object>> documentSearchWithCustomerScore(String indexName, String indexType, List<String> queryFields, List<String> hlFields,
             String keywords, Integer pageNow, Integer pageSize) throws IOException;
+
+    public Map<String, Object> documentSearchWithFuzzy(String indexName, String indexType, String queryField, List<String> hlFields, Fuzziness fuzziness,
+            String keywords, Integer pageNow, Integer pageSize) throws IOException;
+
+    boolean dirHandler(String indexName, String indexType, String path, Integer action) throws IOException;
+
 }

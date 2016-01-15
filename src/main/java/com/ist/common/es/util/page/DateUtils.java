@@ -206,16 +206,16 @@ public class DateUtils {
 			beginDateTemp = this.getPeriodEnd(date);
 		}
 		else if(granularity.equals("4")){//月
-			beginDateTemp = this.getMonthEnd(date);
+			beginDateTemp = getMonthEnd(date);
 		}
 		else if(granularity.equals("5")){//季
-			beginDateTemp = this.getSeasonEnd(date);
+			beginDateTemp = getSeasonEnd(date);
 		}
 		else if(granularity.equals("6")){//半年
-			beginDateTemp = this.getHalfYearEnd(date);
+			beginDateTemp = getHalfYearEnd(date);
 		}
 		else if(granularity.equals("7")){//年
-			beginDateTemp = this.getYearEnd(date);
+			beginDateTemp = getYearEnd(date);
 		}
 		
 		beginDate = DateUtils.dateToStringShort(beginDateTemp);
@@ -405,9 +405,9 @@ public class DateUtils {
      */
     public String getDateChangeTime(String currentTime, String type,
                                     int iQuantity) {
-        Date curr = this.stringToDate(currentTime);
+        Date curr = stringToDate(currentTime);
         curr = this.getDateChangeTime(curr, type, iQuantity);
-        return this.dateToString(curr);
+        return dateToString(curr);
     }
 
     /**
@@ -419,14 +419,14 @@ public class DateUtils {
      */
     public Date getDateChangeTime(Date currentTime, String type,
                                   int iQuantity) {
-        int year = Integer.parseInt(this.FormatDate(currentTime, "yyyy"));
-        int month = Integer.parseInt(this.FormatDate(currentTime, "MM"));
+        int year = Integer.parseInt(FormatDate(currentTime, "yyyy"));
+        int month = Integer.parseInt(FormatDate(currentTime, "MM"));
         //月份修正
         month=month-1;
-        int day = Integer.parseInt(this.FormatDate(currentTime, "dd"));
-        int hour = Integer.parseInt(this.FormatDate(currentTime, "HH"));
-        int mi = Integer.parseInt(this.FormatDate(currentTime, "mm"));
-        int ss = Integer.parseInt(this.FormatDate(currentTime, "ss"));
+        int day = Integer.parseInt(FormatDate(currentTime, "dd"));
+        int hour = Integer.parseInt(FormatDate(currentTime, "HH"));
+        int mi = Integer.parseInt(FormatDate(currentTime, "mm"));
+        int ss = Integer.parseInt(FormatDate(currentTime, "ss"));
         GregorianCalendar gc = new GregorianCalendar(year, month, day,
                 hour, mi, ss);
         //月份修正
@@ -464,15 +464,15 @@ public class DateUtils {
       Date curr = null;
       String newtype = "";
       if(currentTime.length()==10){
-        curr = this.stringToDateShort(currentTime);
+        curr = stringToDateShort(currentTime);
       }
       if(currentTime.length()>10){
-        curr = this.stringToDate(currentTime);
+        curr = stringToDate(currentTime);
       }
       
       //    日
       if(type.equals("1")){
-          iQuantity = iQuantity;
+//          iQuantity = iQuantity;
           newtype = "d";
       }
       //    周，按照7天计算
@@ -487,7 +487,7 @@ public class DateUtils {
       }
       //月
       else if(type.equals("4")){
-          iQuantity = iQuantity;
+//          iQuantity = iQuantity;
           newtype = "m";
       }      
 //    旬，按照3个月计算
@@ -505,7 +505,7 @@ public class DateUtils {
           newtype = "y";
       }
       else{
-    	  iQuantity = iQuantity;
+//    	  iQuantity = iQuantity;
           newtype = "d";
       }
       
@@ -515,7 +515,7 @@ public class DateUtils {
 //      change = this.getMonthEnd(change);
 //      }
       
-      return this.dateToStringShort(change);
+      return dateToStringShort(change);
     }
 
 
@@ -560,9 +560,9 @@ public class DateUtils {
 	 * @return
 	 */
 	public Date getMonthBegin(Date date){
-		String newDateStr = this.FormatDate(date, "yyyy-MM")+"-01";
+		String newDateStr = FormatDate(date, "yyyy-MM")+"-01";
 		//FormatDate(date, "yyyy-MM-dd");
-		return this.stringToDateShort(newDateStr);
+		return stringToDateShort(newDateStr);
 	}
 
     /**
@@ -576,7 +576,7 @@ public class DateUtils {
         int day = Integer.parseInt(FormatDate(date, "dd"));
 
         GregorianCalendar calendar = new GregorianCalendar(year,month-1,day,0,0,0);
-        int monthLength = calendar.getActualMaximum(calendar.DAY_OF_MONTH);
+        int monthLength = calendar.getActualMaximum(Calendar.DAY_OF_MONTH);
         String newDateStr = FormatDate(date,"yyyy")+"-"+FormatDate(date,"MM")+"-";
         if(monthLength<10)
             newDateStr+="0"+monthLength;
@@ -591,9 +591,9 @@ public class DateUtils {
 	 * @return
 	 */
 	public Date getSeasonBegin(Date date){
-		int year = Integer.parseInt( this.FormatDate(date, "yyyy"));
-		int month = Integer.parseInt(this.FormatDate(date, "MM"));
-		String newDateStr = this.FormatDate(date,"yyyy")+"-";
+//		int year = Integer.parseInt( this.FormatDate(date, "yyyy"));
+		int month = Integer.parseInt(FormatDate(date, "MM"));
+		String newDateStr = FormatDate(date,"yyyy")+"-";
 		if( month>=1 && month<=3 ){
 			newDateStr+="01-01";
 		}
@@ -606,7 +606,7 @@ public class DateUtils {
 		else if( month>=10 && month<=12 ){
 			newDateStr+="10-01";
 		}
-		return this.stringToDateShort(newDateStr);
+		return stringToDateShort(newDateStr);
 	}
 	
 	
@@ -616,16 +616,16 @@ public class DateUtils {
 	 * @return
 	 */
 	public Date getHalfYearBegin(Date date){
-		int year = Integer.parseInt( this.FormatDate(date, "yyyy"));
-		int month = Integer.parseInt(this.FormatDate(date, "MM"));
-		String newDateStr = this.FormatDate(date,"yyyy")+"-";
+//		int year = Integer.parseInt( FormatDate(date, "yyyy"));
+		int month = Integer.parseInt(FormatDate(date, "MM"));
+		String newDateStr = FormatDate(date,"yyyy")+"-";
 		if( month<=6 ){
 			newDateStr+="01-01";
 		}
 		else{
 			newDateStr+="07-01";
 		}
-		return this.stringToDateShort(newDateStr);
+		return stringToDateShort(newDateStr);
 	}
 	
 	/**
@@ -634,8 +634,8 @@ public class DateUtils {
 	 * @return
 	 */
 	public Date getPeriodBegin(Date date){
-		int days = Integer.parseInt(this.FormatDate(date, "dd"));
-		String newDateStr = this.FormatDate(date,"yyyy-MM")+"-";
+		int days = Integer.parseInt(FormatDate(date, "dd"));
+		String newDateStr = FormatDate(date,"yyyy-MM")+"-";
 		if( days<=10 ){
 			newDateStr+="01";
 		}
@@ -644,7 +644,7 @@ public class DateUtils {
 		}else{
 			newDateStr+="21";
 		}
-		return this.stringToDateShort(newDateStr);
+		return stringToDateShort(newDateStr);
 	}
 	
 	
@@ -655,11 +655,11 @@ public class DateUtils {
 	 */
 	public Date getWeekBegin(Date date){
 		
-		 int year = Integer.parseInt(this.FormatDate(date, "yyyy"));
-	        int month = Integer.parseInt(this.FormatDate(date, "MM"));
+		 int year = Integer.parseInt(FormatDate(date, "yyyy"));
+	        int month = Integer.parseInt(FormatDate(date, "MM"));
 	        //月份修正
 	        month=month-1;
-	        int day = Integer.parseInt(this.FormatDate(date, "dd"));
+	        int day = Integer.parseInt(FormatDate(date, "dd"));
 	       
 	        GregorianCalendar gc = new GregorianCalendar(year, month, day
 	                );
@@ -683,11 +683,11 @@ public class DateUtils {
 	 */
 	public Date getWeekEnd(Date date){
 		
-		 int year = Integer.parseInt(this.FormatDate(date, "yyyy"));
-	        int month = Integer.parseInt(this.FormatDate(date, "MM"));
+		 int year = Integer.parseInt(FormatDate(date, "yyyy"));
+	        int month = Integer.parseInt(FormatDate(date, "MM"));
 	        //月份修正
 	        month=month-1;
-	        int day = Integer.parseInt(this.FormatDate(date, "dd"));
+	        int day = Integer.parseInt(FormatDate(date, "dd"));
 	       
 	        GregorianCalendar gc = new GregorianCalendar(year, month, day
 	                );
@@ -708,17 +708,17 @@ public class DateUtils {
 	 * @return
 	 */
 	public Date getPeriodEnd(Date date){
-		int days = Integer.parseInt(this.FormatDate(date, "dd"));
-		String newDateStr = this.FormatDate(date,"yyyy-MM")+"-";
+		int days = Integer.parseInt(FormatDate(date, "dd"));
+		String newDateStr = FormatDate(date,"yyyy-MM")+"-";
 		if( days<=10 ){
 			newDateStr+="10";
 		}
 		else if( days<=20 ){
 			newDateStr+="20";
 		}else{
-			newDateStr=this.FormatDate(this.getMonthEnd(date),"yyyy-MM-dd");
+			newDateStr=FormatDate(getMonthEnd(date),"yyyy-MM-dd");
 		}
-		return this.stringToDateShort(newDateStr);
+		return stringToDateShort(newDateStr);
 	}
 	
 	
@@ -728,16 +728,16 @@ public class DateUtils {
 	 * @return
 	 */
 	public Date getHalfYearEnd(Date date){
-		int year = Integer.parseInt( this.FormatDate(date, "yyyy"));
-		int month = Integer.parseInt(this.FormatDate(date, "MM"));
-		String newDateStr = this.FormatDate(date,"yyyy")+"-";
+//		int year = Integer.parseInt( FormatDate(date, "yyyy"));
+		int month = Integer.parseInt(FormatDate(date, "MM"));
+		String newDateStr = FormatDate(date,"yyyy")+"-";
 		if( month<=6 ){
 			newDateStr+="06-30";
 		}
 		else{
 			newDateStr+="12-31";
 		}
-		return this.stringToDateShort(newDateStr);
+		return stringToDateShort(newDateStr);
 	}
 
     /**
@@ -746,7 +746,7 @@ public class DateUtils {
      * @return date
      */
     public static Date getSeasonEnd(Date date){
-        int year = Integer.parseInt( FormatDate(date, "yyyy"));
+//        int year = Integer.parseInt( FormatDate(date, "yyyy"));
         int month = Integer.parseInt(FormatDate(date, "MM"));
         String newDateStr = FormatDate(date,"yyyy")+"-";
         if( month>=1 && month<=3 ){
@@ -770,8 +770,8 @@ public class DateUtils {
 	 * @return
 	 */
 	public Date getYearBegin(Date date){
-		String newDateStr = this.FormatDate(date,"yyyy")+"-01-01";
-		return this.stringToDateShort(newDateStr);
+		String newDateStr = FormatDate(date,"yyyy")+"-01-01";
+		return stringToDateShort(newDateStr);
 	}
 
     /**
@@ -793,8 +793,8 @@ public class DateUtils {
     	
     	boolean flag = false;
         
-    	String day = this.getDay(date);
-        String month = this.getMonth(date);
+    	String day = getDay(date);
+//        String month = this.getMonth(date);
         
         if( day.equalsIgnoreCase("10") ){
             flag = true;
