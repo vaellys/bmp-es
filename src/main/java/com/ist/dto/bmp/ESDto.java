@@ -18,6 +18,7 @@ public class ESDto extends BaseDto implements Serializable {
      * 机构key
      */
     private String organkey;
+    private double similarity;
     public String getOrgankey() {
         return organkey;
     }
@@ -32,5 +33,10 @@ public class ESDto extends BaseDto implements Serializable {
     public void setContentPy(String contentPy) {
         this.contentPy = contentPy;
     }
-    
+    public double getSimilarity() {
+        return similarity;
+    }
+    public void setSimilarity(double similarity) {
+        this.similarity = similarity;
+    }
 }

@@ -24,6 +24,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.elasticsearch.common.unit.Fuzziness;
+import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.FuzzyLikeThisQueryBuilder;
 import org.elasticsearch.index.query.FuzzyQueryBuilder;
 import org.elasticsearch.index.query.MatchAllQueryBuilder;
@@ -94,8 +95,13 @@ public class IESServiceImpl extends AbstractIESService {
                         + LogUtils.format("indexNames", indexNames, "indexTypes", indexTypes, "keywords", keywords, "pageNow", pageNow, "pageSize",
                                 pageSize));
             }
+            
             QueryStringQueryBuilder queryStringBuilder = this.queryStringBuilder(keywords, queryFields);
-            return this.documentSearch(indexNames, indexTypes, queryStringBuilder, true, Pagination.cpn(pageNow), Pagination.cps(pageSize));
+            FuzzyQueryBuilder fuzzyBuilder = this.fuzzyBuilder("content.prototype", keywords, Fuzziness.TWO);
+            
+            BoolQueryBuilder boolQueryBuilder = this.boolQueryBuilder();
+            boolQueryBuilder.should(queryStringBuilder).should(fuzzyBuilder);
+            return this.documentSearch(indexNames, indexTypes, boolQueryBuilder, true, keywords, Pagination.cpn(pageNow), Pagination.cps(pageSize));
         } catch (IOException e) {
             logger.error(
                     "搜索失败"

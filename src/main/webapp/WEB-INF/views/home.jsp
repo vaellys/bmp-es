@@ -1,17 +1,15 @@
+<%@ page language="java" pageEncoding="utf-8"%>
 <%@ taglib prefix="spring" uri="http://www.springframework.org/tags" %>
-<%@ page contentType="text/html;charset=UTF-8" language="java"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 <html>
 <HEAD>
-    <META http-equiv=Content-Type content="text/html; charset=utf-8">
-
-<link id="skinb" href="${pageContext.request.contextPath}/resources/style/awp_base.css" rel="stylesheet" type="text/css">
-<link href="${pageContext.request.contextPath}/resources/style/selectCss.css" rel="stylesheet" type="text/css" />
+<link id="skinb" href="<%=request.getContextPath() %>/resources/style/awp_base.css" rel="stylesheet" type="text/css">
+<link href="<%=request.getContextPath() %>/resources/style/selectCss.css" rel="stylesheet" type="text/css" />
 
  
-<script type="text/javascript" src="${pageContext.request.contextPath}/resources/js/jquery-1.6.min.js"></script>
+<script type="text/javascript" src="<%=request.getContextPath() %>/resources/js/jquery-1.6.min.js"></script>
 
-<script type="text/javascript" src="${pageContext.request.contextPath}/resources/js/lib.js"></script>
+<script type="text/javascript" src="<%=request.getContextPath() %>/resources/js/lib.js"></script>
 
 
 
@@ -94,7 +92,7 @@
             
  
 </SCRIPT>
-<script type="text/javascript" src="${pageContext.request.contextPath}/resources/js/basefunc.js"></script>
+<script type="text/javascript" src="<%=request.getContextPath() %>/resources/js/basefunc.js"></script>
 <style>
 .input_label{clear:both;}
 .input_label input,.input_label label{float:left;height:34px;line-height:34px;margin-right:5px;}

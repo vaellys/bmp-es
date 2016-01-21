@@ -4,3 +4,4 @@ bmp-logs/
 .settings/
 .sonar/
 sonar-project.properties
+/target

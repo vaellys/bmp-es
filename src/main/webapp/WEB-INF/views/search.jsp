@@ -1,17 +1,15 @@
+<%@ page  isELIgnored="false" language="java" pageEncoding="utf-8"%>
 <%@ taglib prefix="spring" uri="http://www.springframework.org/tags" %>
-<%@ page contentType="text/html;charset=UTF-8" language="java"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 <html>
 <HEAD>
-    <META http-equiv=Content-Type content="text/html; charset=utf-8">
-
-<link id="skinb" href="${pageContext.request.contextPath}/resources/style/awp_base.css" rel="stylesheet" type="text/css">
-<link href="${pageContext.request.contextPath}/resources/style/selectCss.css" rel="stylesheet" type="text/css" />
+<link id="skinb" href="<%=request.getContextPath() %>/resources/style/awp_base.css" rel="stylesheet" type="text/css">
+<link href="<%=request.getContextPath() %>/resources/style/selectCss.css" rel="stylesheet" type="text/css" />
 
  
-<script type="text/javascript" src="${pageContext.request.contextPath}/resources/js/jquery-1.6.min.js"></script>
+<script type="text/javascript" src="<%=request.getContextPath() %>/resources/js/jquery-1.6.min.js"></script>
 
-<script type="text/javascript" src="${pageContext.request.contextPath}/resources/js/lib.js"></script>
+<script type="text/javascript" src="<%=request.getContextPath() %>/resources/js/lib.js"></script>
 
     
     <title>原型示例</title>
@@ -89,7 +87,7 @@
             
  
 </SCRIPT>
-<script type="text/javascript" src="${pageContext.request.contextPath}/resources/js/basefunc.js"></script>
+<script type="text/javascript" src="<%=request.getContextPath() %>/resources/js/basefunc.js"></script>
 <style>
 .input_label{clear:both;}
 .input_label input,.input_label label{float:left;height:34px;line-height:34px;margin-right:5px;}
@@ -149,9 +147,10 @@
        <div class="awp_search_list">
           <c:forEach items="${esDtos}" var="dto">
           <dl style="border:0px;">
-            <dt><a href="${pageContext.request.contextPath}/resources/doc/${dto.path}" target="_blank">${dto.name}</a></dt>
+            <dt><a href="<%=request.getContextPath() %>/resources/doc/${dto.path}" target="_blank">${dto.name}</a></dt>
             <dd>${dto.content}</dd>
           </dl>
+          <font color="red">${dto.similarity }</font>
           </c:forEach>
 
            
@@ -163,9 +162,8 @@
     
 
 
-
-     <div class='awp_page_bottom' >
-        <!--首页p_first，上一页p_prev；首页不可点击样式p_first01，上一页不可点击样式p_prev01-->
+     <!-- <div class='awp_page_bottom' >
+        首页p_first，上一页p_prev；首页不可点击样式p_first01，上一页不可点击样式p_prev01
         <span class="p_first01"></span>
         <span class="p_prev01"></span>
         <span></span>
@@ -173,7 +171,7 @@
             共 <strong>5</strong> 条记录 共 <strong>1</strong> 页 当前第 <strong>1</strong> 页
         </span>
         <span></span>
-        <!--尾页p_last，下一页p_next；尾页不可点击样式p_last01，下一页不可点击样式p_next01-->
+        尾页p_last，下一页p_next；尾页不可点击样式p_last01，下一页不可点击样式p_next01
         <span class="p_next"></span>
         <span class="p_last"></span>
         <span class="p_select">
@@ -182,7 +180,8 @@
               <option selected="" value="1">1</option>
             </select>
         </span>
-      </div>
+      </div> -->
+      
 
     </div>
 

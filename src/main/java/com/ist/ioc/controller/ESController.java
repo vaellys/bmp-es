@@ -26,9 +26,10 @@ public class ESController {
     @RequestMapping(value = "/index.do")
     public String documentIndex(ModelMap modelMap, HttpServletRequest request){
 //        String path = "D:\\upload\\";
-        String path = "C:\\java_team\\workspaces\\bmp-es\\src\\main\\webapp\\resources\\doc";
         try {
-            iesService.dirHandler(INDEX_NAME, INDEX_TYPE, path, 1);
+            String realPath = request.getSession().getServletContext().getRealPath("/");
+            String dir = realPath + "/resources/doc/";
+            iesService.dirHandler(INDEX_NAME, INDEX_TYPE, dir, 1);
             modelMap.put("message", "文章索引已创建成功!");
         } catch (IOException e) {
             e.printStackTrace();
@@ -45,6 +46,7 @@ public class ESController {
             queryFields.add("content");
             queryFields.add("name");
             queryFields.add("content.py");
+            queryFields.add("content.en");
             List<String> indexNames = new ArrayList<String>();
             indexNames.add(INDEX_NAME);
             List<String> indexTypes = new ArrayList<String>();
@@ -55,5 +57,10 @@ public class ESController {
             e.printStackTrace();
         }
         return "search";
+    }
+    
+    @RequestMapping(value = "/home.do")
+    public String index(){
+        return "home";
     }
 }
