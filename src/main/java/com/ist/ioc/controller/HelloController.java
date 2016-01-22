@@ -172,4 +172,8 @@ public class HelloController {
         return new String(result);
 
     }
+    
+    public static void main(String[] args) {
+        System.out.println(similarityResult(1.1314777098891948E-4));
+    }
 }

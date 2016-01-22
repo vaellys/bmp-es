@@ -150,7 +150,7 @@
             <dt><a href="<%=request.getContextPath() %>/resources/doc/${dto.path}" target="_blank">${dto.name}</a></dt>
             <dd>${dto.content}</dd>
           </dl>
-          <font color="red">${dto.similarity }</font>
+          <font color="red"><b>相似度：</b>${dto.similarity }</font>
           </c:forEach>
 
            

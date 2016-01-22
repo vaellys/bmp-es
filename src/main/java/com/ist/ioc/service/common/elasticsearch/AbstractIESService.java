@@ -107,6 +107,10 @@ import com.ist.dto.bmp.ESDto;
 public abstract class AbstractIESService implements IESService {
 
     private static final Log logger = LogFactory.getLog(AbstractIESService.class);
+    /**
+     *总记录数
+     */
+    private static final int ES_TOTAL_COUNT = 10000;
     @Resource
     public JestClient client;
     @Resource
@@ -651,7 +655,8 @@ public abstract class AbstractIESService implements IESService {
     protected Pagination documentSearch(List<String> indexNames, List<String> indexTypes, QueryBuilder queryQuery, Boolean isHighlight,
             Integer pageNow, Integer pageSize) throws IOException {
         try {
-            Builder builder = getSearchBuilder(queryQuery, isHighlight, pageNow, pageSize);
+//          Builder builder = getSearchBuilder(queryQuery, isHighlight, pageNow, pageSize);
+            Builder builder = getSearchBuilder(queryQuery, isHighlight);
             // 构建搜索
             SearchResult result = searchResultExecute(indexNames, indexTypes, builder);
             Pagination p = searchResultHandler(result, pageNow, pageSize);
@@ -820,6 +825,42 @@ public abstract class AbstractIESService implements IESService {
         Builder builder = new Search.Builder(ssb.toString());
         return builder;
     }
+    
+    /**
+     * 获取查询构建器
+     * 
+     * @param queryQuery
+     * @param isHighlight
+     *            是否高亮
+     * @param pageNow
+     *            当前页
+     * @param pageSize
+     *            页大小
+     * @return Builder
+     */
+    protected Builder getSearchBuilder(QueryBuilder queryQuery, Boolean isHighlight) {
+        SearchSourceBuilder ssb = searchSourceBuilder.query(queryQuery);
+        // ssb.fields("description");
+        // ssb.fields("content");
+        // 设置分页
+        ssb.from(0).size(ES_TOTAL_COUNT);
+        // 设置排序方式
+        // SuggestionBuilder<?> suggestion = new
+        // TermSuggestionBuilder("suggestion").field("path").text("你好").analyzer("english");
+        // ssb.suggest().addSuggestion(suggestion);
+        if (isHighlight) {
+            HighlightBuilder highlight = SearchSourceBuilder.highlight().requireFieldMatch(true);
+            HighlightBuilder hlb = highlight.preTags("<font color='red'>").postTags("</font>");
+            hlb.field(ES_FIELD_TITLE).field(ES_FIELD_DESCRIPTION).field(ES_FIELD_CONTENT).field("name").field("content.py").field("content.en")
+                    .field("content.prototype");
+            ssb.highlight(hlb);
+        }
+        if (logger.isDebugEnabled()) {
+            logger.debug("query string: " + ssb.toString());
+        }
+        Builder builder = new Search.Builder(ssb.toString());
+        return builder;
+    }
 
     /**
      * 查询结果处理
@@ -958,7 +999,7 @@ public abstract class AbstractIESService implements IESService {
         Pagination p = null;
         List<ESDto> list = new ArrayList<ESDto>();
         if (null != result && result.isSucceeded()) {
-            p = getPagination(result, pageNow, pageSize);
+//            p = getPagination(result, pageNow, pageSize);
             List<Hit<ESDto, Void>> hits = result.getHits(ESDto.class);
             for (Hit<ESDto, Void> hit : hits) {
                 ESDto source = hit.source;
@@ -1020,7 +1061,11 @@ public abstract class AbstractIESService implements IESService {
                     }
                 }
             });
-            p.setList(list);
+            if(null != list && !list.isEmpty()){
+                p = new Pagination(pageNow, pageSize, list, list.size());
+            }else{
+                p = new Pagination();
+            }
         }
         return p;
     }
@@ -1097,6 +1142,32 @@ public abstract class AbstractIESService implements IESService {
      */
     @SuppressWarnings({ "unchecked", "rawtypes" })
     private Map<String, Object> getHighlightMap(List<String> hlFields, Hit<Map, Void> hit) {
+        Map<String, Object> source = hit.source;
+        Map<String, List<String>> highlight = hit.highlight;
+        if (null != highlight) {
+            if (null != hlFields) {
+                for (String field : hlFields) {
+                    if (highlight.containsKey(field)) {
+                        List<String> h = highlight.get(field);
+                        source.put(field, h.get(0));
+                    }
+                }
+            }
+        }
+        return source;
+    }
+    
+    /**
+     * 获取设置高亮之后的对象
+     * 
+     * @param fields
+     *            高亮的字段
+     * @param hit
+     *            命中的对象
+     * @return Map<String, Object>
+     */
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    protected Map<String, Object> getHighlightMap(List<String> hlFields, Hit<Map, Void> hit, String keywords) {
         Map<String, Object> source = hit.source;
         Map<String, List<String>> highlight = hit.highlight;
         if (null != highlight) {
