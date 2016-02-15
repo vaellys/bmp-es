@@ -2,23 +2,15 @@ package com.ist.ioc.service.common.elasticsearch;
 
 import static com.ist.ioc.service.common.Constants.ES_ADD_ACTION;
 import static com.ist.ioc.service.common.Constants.ES_DELETE_ACTION;
-import static com.ist.ioc.service.common.Constants.ES_ENGLISH;
 import static com.ist.ioc.service.common.Constants.ES_FIELD_CONTENT;
 import static com.ist.ioc.service.common.Constants.ES_FIELD_DESCRIPTION;
-import static com.ist.ioc.service.common.Constants.ES_FIELD_EN;
-import static com.ist.ioc.service.common.Constants.ES_FIELD_NAME;
-import static com.ist.ioc.service.common.Constants.ES_FIELD_PATH;
-import static com.ist.ioc.service.common.Constants.ES_FIELD_PY;
 import static com.ist.ioc.service.common.Constants.ES_FIELD_TITLE;
-import static com.ist.ioc.service.common.Constants.ES_IK;
 import static com.ist.ioc.service.common.Constants.ES_INDEX_CREATE_TIME;
 import static com.ist.ioc.service.common.Constants.ES_PAGE_ID;
 import static com.ist.ioc.service.common.Constants.ES_PAGE_SIZE;
-import static com.ist.ioc.service.common.Constants.ES_PINYIN_ANALYZER;
 import static com.ist.ioc.service.common.Constants.ES_RESULT;
 import static com.ist.ioc.service.common.Constants.ES_RESULT_KEY;
 import static com.ist.ioc.service.common.Constants.ES_SCORE;
-import static com.ist.ioc.service.common.Constants.ES_T2S_CONVERT;
 import static com.ist.ioc.service.common.Constants.ES_TOTAL_PAGE;
 import static com.ist.ioc.service.common.Constants.ES_TOTAL_SIZE;
 import static com.ist.ioc.service.common.Constants.ES_UPDATE_ACTION;
@@ -53,20 +45,10 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.commons.pool.impl.GenericObjectPool;
-import org.apache.lucene.analysis.Analyzer;
-import org.apache.lucene.analysis.en.EnglishAnalyzer;
-import org.apache.lucene.util.Version;
 import org.elasticsearch.common.settings.ImmutableSettings;
-import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.unit.Fuzziness;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.XContentFactory;
-import org.elasticsearch.index.analysis.NamedAnalyzer;
-import org.elasticsearch.index.analysis.PinyinAnalyzer;
-import org.elasticsearch.index.analysis.STConvertAnalyzer;
-import org.elasticsearch.index.mapper.DocumentMapper;
-import org.elasticsearch.index.mapper.core.StringFieldMapper;
-import org.elasticsearch.index.mapper.object.RootObjectMapper;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.FuzzyLikeThisFieldQueryBuilder;
 import org.elasticsearch.index.query.FuzzyLikeThisQueryBuilder;
@@ -89,7 +71,6 @@ import org.elasticsearch.index.query.functionscore.ScoreFunctionBuilder;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.highlight.HighlightBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.wltea.analyzer.lucene.IKAnalyzer;
 
 import com.ist.assemble.CustomImmutableSetting;
 import com.ist.common.es.util.DateUtils;
@@ -399,7 +380,7 @@ public abstract class AbstractIESService implements IESService {
      *            索引类型
      * @return String 映射字符串
      */
-    protected String buildMappingJsonStr(String index, String type) {
+   /* protected String buildMappingJsonStr(String index, String type) {
         try {
             // 创建ik分词器
             Analyzer ik = new IKAnalyzer();
@@ -446,7 +427,7 @@ public abstract class AbstractIESService implements IESService {
         org.elasticsearch.index.mapper.core.StringFieldMapper.Builder fieldBuilder = new StringFieldMapper.Builder(field).indexAnalyzer(na)
                 .searchAnalyzer(na);
         return fieldBuilder;
-    }
+    }*/
 
     /**
      * 
@@ -655,8 +636,7 @@ public abstract class AbstractIESService implements IESService {
     protected Pagination documentSearch(List<String> indexNames, List<String> indexTypes, QueryBuilder queryQuery, Boolean isHighlight,
             Integer pageNow, Integer pageSize) throws IOException {
         try {
-//          Builder builder = getSearchBuilder(queryQuery, isHighlight, pageNow, pageSize);
-            Builder builder = getSearchBuilder(queryQuery, isHighlight);
+          Builder builder = getSearchBuilder(queryQuery, isHighlight, pageNow, pageSize);
             // 构建搜索
             SearchResult result = searchResultExecute(indexNames, indexTypes, builder);
             Pagination p = searchResultHandler(result, pageNow, pageSize);
@@ -689,7 +669,7 @@ public abstract class AbstractIESService implements IESService {
     protected Pagination documentSearch(List<String> indexNames, List<String> indexTypes, QueryBuilder queryQuery, Boolean isHighlight,
             String keywords, Integer pageNow, Integer pageSize) throws IOException {
         try {
-            Builder builder = getSearchBuilder(queryQuery, isHighlight, pageNow, pageSize);
+            Builder builder = getSearchBuilder(queryQuery, isHighlight);
             // 构建搜索
             SearchResult result = searchResultExecute(indexNames, indexTypes, builder);
             Pagination p = searchResultHandler(result, keywords, pageNow, pageSize);
@@ -802,7 +782,7 @@ public abstract class AbstractIESService implements IESService {
      *            页大小
      * @return Builder
      */
-    private Builder getSearchBuilder(QueryBuilder queryQuery, Boolean isHighlight, Integer pageNow, Integer pageSize) {
+    protected Builder getSearchBuilder(QueryBuilder queryQuery, Boolean isHighlight, Integer pageNow, Integer pageSize) {
         SearchSourceBuilder ssb = searchSourceBuilder.query(queryQuery);
         // ssb.fields("description");
         // ssb.fields("content");
@@ -1583,6 +1563,16 @@ public abstract class AbstractIESService implements IESService {
             logger.error("删除索引失败", e);
             throw new IOException("删除索引失败", e);
         }
+    }
+    
+    /**
+     * 根据索引全部删除
+     * @param indexName
+     * @return
+     * @throws IOException
+     */
+    public boolean deleteIndex(String indexName) throws IOException {
+        return deleteIndex(indexName, null);
     }
 
     public boolean deleteIndexType(String indexName, String indexType) throws IOException {
