@@ -25,7 +25,7 @@ public class Constants{
     /**
      * es id
      */
-    public static final String ES_RESULT_KEY = "id";
+    public static final String ES_RESULT_KEY = "ENT_ID";
     /**
      * 结果常量
      */
@@ -45,9 +45,9 @@ public class Constants{
      */
     public static final String ES_PAGE_ID = "page_id";
     public static final String ES_PAGE_SIZE = "page_size";
-    public static final String ES_TOTAL_SIZE = "total_size";
+    public static final String ES_TOTAL_SIZE = "page_count";
     public static final String ES_TABLE_NAME = "table_name";
-    public static final String ES_TOTAL_PAGE = "total_page";
+    public static final String ES_TOTAL_PAGE = "page_total";
     
     /**
      * 分词器常量
@@ -70,6 +70,8 @@ public class Constants{
     public static final String ES_FIELD_PY = "py";
     public static final String ES_FIELD_EN = "en";
     public static final String ES_FIELD_PATH = "path";
+    public static final String ES_BEGIN_TAG = "<font color='red'>";
+    public static final String ES_END_TAG = "</font>";
     
     /**
      * 查询得分定义

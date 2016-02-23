@@ -1,9 +1,7 @@
 package com.ist.ioc.service.common.elasticsearch;
 
 import static com.ist.ioc.service.common.Constants.ES_ADD_ACTION;
-import static com.ist.ioc.service.common.Constants.ES_BEGIN_TAG;
 import static com.ist.ioc.service.common.Constants.ES_DELETE_ACTION;
-import static com.ist.ioc.service.common.Constants.ES_END_TAG;
 import static com.ist.ioc.service.common.Constants.ES_FIELD_CONTENT;
 import static com.ist.ioc.service.common.Constants.ES_FIELD_DESCRIPTION;
 import static com.ist.ioc.service.common.Constants.ES_FIELD_TITLE;
@@ -88,9 +86,9 @@ import com.ist.dto.bmp.QueryParamsDto;
  * 
  * @author qianguobing
  */
-public abstract class AbstractIESService implements IESService {
+public abstract class IESProvider implements IESService {
 
-    private static final Log logger = LogFactory.getLog(AbstractIESService.class);
+    private static final Log logger = LogFactory.getLog(IESProvider.class);
     /**
      *总记录数
      */
@@ -172,7 +170,7 @@ public abstract class AbstractIESService implements IESService {
             // es库名只能是小写字母
             indexName = StringUtils.lowerCase(indexName);
             // 删除索引
-//            this.deleteIndex(indexName, null);
+            this.deleteIndex(indexName, null);
             // 创建索引
             this.addIndex(indexName);
             // 设置默认的索引名字
@@ -311,12 +309,8 @@ public abstract class AbstractIESService implements IESService {
         for (int i = 0; i < documents.size(); i++) {
             Map<String, Object> map = documents.get(i);
             map.put(ES_INDEX_CREATE_TIME, DateUtils.getCurrTime());
-            Object id = map.get(ES_RESULT_KEY);
-            if(null != id && !StringUtils.isBlank((String.valueOf(id)))){
-                indexs[i] = new Index.Builder(map).id(String.valueOf(id)).build();
-            }else{
-                indexs[i] = new Index.Builder(map).build();
-            }
+            String id = String.valueOf(map.get(ES_RESULT_KEY));
+            indexs[i] = new Index.Builder(map).id(id).build();
         }
         return indexs;
     }
@@ -456,171 +450,84 @@ public abstract class AbstractIESService implements IESService {
      * @return String 映射字符串
      * @throws IOException
      */
-    protected String buildMappingJsonStr(String type) throws Exception {
+    protected String buildMappingJsonStr(String type) throws IOException {
         try {
             XContentBuilder jsonBuilder = XContentFactory.jsonBuilder();
-            XContentBuilder content = jsonBuilder.startObject()
-                .startObject(type)
-                    .startObject("properties")
-                    
-                        .startObject("name")
-                            .field("type", "string")
-                            .field("store", "yes")
-                            .field("index", "not_analyzed")
-                        .endObject()
-                        
-                        .startObject("description")
-                            .field("type", "multi_field")
-                            .field("index", "analyzed")
-                            .startObject("fields")
-                                .startObject("py")
-                                    .field("type", "string")
-                                    .field("store", "yes")
-                                    .field("index", "analyzed")
-                                    .field("indexAnalyzer", "pinyin_analyzer")
-                                    .field("searchAnalyzer", "pinyin_analyzer")
-                                .endObject()
-                                .startObject("description")
-                                    .field("type", "string")
-                                    .field("store", "yes")
-                                    .field("index", "analyzed")
-                                    .field("indexAnalyzer", "ik")
-                                    .field("searchAnalyzer", "ik")
-                                .endObject()
-                            .endObject()
-                        .endObject()
-                        
-                        .startObject("content")
-                            .field("type", "multi_field")
-                            .field("index", "analyzed")
-                            .startObject("fields")
-                                .startObject("py")
-                                    .field("type", "string")
-                                    .field("store", "no")
-                                    .field("index", "analyzed")
-                                    .field("indexAnalyzer", "pinyin_analyzer")
-                                    .field("searchAnalyzer", "pinyin_analyzer")
-                                .endObject()
-                                .startObject("en")
-                                    .field("type", "string")
-                                    .field("store", "no")
-                                    .field("index", "analyzed")
-                                    .field("indexAnalyzer", "english")
-                                    .field("searchAnalyzer", "english")
-                                .endObject()
-                                .startObject("content")
-                                    .field("type", "string")
-                                    .field("store", "no")
-                                    .field("index", "analyzed")
-                                    .field("indexAnalyzer", "ik")
-                                    .field("searchAnalyzer", "ik")
-                                .endObject()
-                                .startObject("t2s")
-                                    .field("type", "string")
-                                    .field("store", "no")
-                                    .field("index", "analyzed")
-                                    .field("indexAnalyzer", "mytsconvert")
-                                    .field("searchAnalyzer", "mytsconvert")
-                                .endObject()
-                                 .startObject("russian")
-                                    .field("type", "string")
-                                    .field("store", "no")
-                                    .field("index", "analyzed")
-                                    .field("indexAnalyzer", "russian")
-                                    .field("searchAnalyzer", "russian")
-                                .endObject()
-                            .endObject()
-                        .endObject()
-                        
-                        .startObject("path")
-                            .field("type", "string")
-                            .field("store", "yes")
-                            .field("index", "not_analyzed")
-                        .endObject()
-                        
-                         .startObject("title")
-                            .field("type", "multi_field")
-                            .field("index", "analyzed")
-                            .startObject("fields")
-                                .startObject("py_only")
-                                    .field("type", "string")
-                                    .field("store", "no")
-                                    .field("index", "analyzed")
-                                    .field("indexAnalyzer", "pinyin_analyzer")
-                                    .field("searchAnalyzer", "pinyin_analyzer")
-                                .endObject()
-                                .startObject("py_none")
-                                    .field("type", "string")
-                                    .field("store", "no")
-                                    .field("index", "analyzed")
-                                    .field("indexAnalyzer", "user_name_analyzer1")
-                                    .field("searchAnalyzer", "user_name_analyzer1")
-                                .endObject()
-                                .startObject("title")
-                                    .field("type", "string")
-                                    .field("store", "yes")
-                                    .field("index", "analyzed")
-                                    .field("indexAnalyzer", "ik")
-                                    .field("searchAnalyzer", "ik")
-                                .endObject()
-                                .startObject("t2s")
-                                    .field("type", "string")
-                                    .field("store", "yes")
-                                    .field("index", "analyzed")
-                                    .field("indexAnalyzer", "mytsconvert")
-                                    .field("searchAnalyzer", "mytsconvert")
-                                .endObject()
-                                .startObject("russian")
-                                    .field("type", "string")
-                                    .field("store", "yes")
-                                    .field("index", "analyzed")
-                                    .field("indexAnalyzer", "russian")
-                                    .field("searchAnalyzer", "russian")
-                                .endObject()
-                                .startObject("french")
-                                    .field("type", "string")
-                                    .field("store", "yes")
-                                    .field("index", "analyzed")
-                                    .field("indexAnalyzer", "polish")
-                                    .field("searchAnalyzer", "polish")
-                                .endObject()
-                            .endObject()
-                        .endObject()
-                    .endObject()
-                .endObject()
-            .endObject();
-            
-            
-            
-            
-         /*   XContentBuilder content = XContentFactory.jsonBuilder();
-                      .startObject()
-                    // 索引库名（类似数据库中的表）
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    .startObject(type).startObject("_timestamp").field("enabled", true).field("store", "yes").field("path", ES_CREATETIME)
-                    .field("format", "yyyy-MM-dd HH:mm:ss").endObject().startObject("properties").startObject("id").field("type", "string")
-                    .endObject().startObject("title").field("type", "string").endObject().startObject(ES_PATH).field("type", "string").endObject()
-                    .startObject(ES_CREATETIME).field("type", "date").field("store", "yes").field("format", "yyyy-MM-dd HH:mm:ss").endObject()
-                    .startObject(ES_DESCRIPTION).field("type", "multi_field").field("index", "analyzed").startObject("fields")
-                    .startObject(ES_DESCRIPTION).field("type", "string").field("store", "yes").field("index", "analyzed")
-                    .field("indexAnalyzer", "ik").field("searchAnalyzer", "ik").field("term_vector", "with_positions_offsets")
-                    .field("boost", 4.0)
-                    // 打分(默认1.0)
-                    .endObject().startObject("py").field("type", "string").field("store", "yes").field("index", "analyzed")
-                    .field("indexAnalyzer", "pinyin_analyzer").field("searchAnalyzer", "pinyin_analyzer")
-                    .field("term_vector", "with_positions_offsets").field("include_in_all", "false").field("boost", 4.0) // 打分(默认1.0)
-                    .endObject().endObject().endObject().endObject().endObject().endObject();*/
+            XContentBuilder content = jsonBuilder.startObject().startObject(type).startObject("properties")
+
+            .startObject("name").field("type", "string").field("store", "yes").field("index", "not_analyzed").endObject()
+
+            .startObject("description").field("type", "multi_field").field("index", "analyzed").startObject("fields").startObject("py")
+                    .field("type", "string").field("store", "yes").field("index", "analyzed").field("indexAnalyzer", "pinyin_analyzer")
+                    .field("searchAnalyzer", "pinyin_analyzer").endObject().startObject("description").field("type", "string").field("store", "yes")
+                    .field("index", "analyzed").field("indexAnalyzer", "ik").field("searchAnalyzer", "ik").endObject().endObject().endObject()
+
+                    .startObject("content").field("type", "multi_field").field("index", "analyzed").startObject("fields").startObject("py")
+                    .field("type", "string").field("store", "no").field("index", "analyzed").field("indexAnalyzer", "pinyin_analyzer")
+                    .field("searchAnalyzer", "pinyin_analyzer").endObject().startObject("en").field("type", "string").field("store", "no")
+                    .field("index", "analyzed").field("indexAnalyzer", "english").field("searchAnalyzer", "english").endObject()
+                    .startObject("content").field("type", "string").field("store", "no").field("index", "analyzed").field("indexAnalyzer", "ik")
+                    .field("searchAnalyzer", "ik").endObject().startObject("t2s").field("type", "string").field("store", "no")
+                    .field("index", "analyzed").field("indexAnalyzer", "mytsconvert").field("searchAnalyzer", "mytsconvert").endObject()
+                    .startObject("russian").field("type", "string").field("store", "no").field("index", "analyzed").field("indexAnalyzer", "russian")
+                    .field("searchAnalyzer", "russian").endObject().endObject().endObject()
+
+                    .startObject("path").field("type", "string").field("store", "yes").field("index", "not_analyzed").endObject()
+
+                    .startObject("title").field("type", "multi_field").field("index", "analyzed").startObject("fields").startObject("py_only")
+                    .field("type", "string").field("store", "no").field("index", "analyzed").field("indexAnalyzer", "pinyin_analyzer")
+                    .field("searchAnalyzer", "pinyin_analyzer").endObject().startObject("py_none").field("type", "string").field("store", "no")
+                    .field("index", "analyzed").field("indexAnalyzer", "user_name_analyzer1").field("searchAnalyzer", "user_name_analyzer1")
+                    .endObject().startObject("title").field("type", "string").field("store", "yes").field("index", "analyzed")
+                    .field("indexAnalyzer", "ik").field("searchAnalyzer", "ik").endObject().startObject("t2s").field("type", "string")
+                    .field("store", "yes").field("index", "analyzed").field("indexAnalyzer", "mytsconvert").field("searchAnalyzer", "mytsconvert")
+                    .endObject().startObject("russian").field("type", "string").field("store", "yes").field("index", "analyzed")
+                    .field("indexAnalyzer", "russian").field("searchAnalyzer", "russian").endObject().startObject("french").field("type", "string")
+                    .field("store", "yes").field("index", "analyzed").field("indexAnalyzer", "polish").field("searchAnalyzer", "polish").endObject()
+                    .endObject().endObject().endObject().endObject().endObject();
+
+            /*
+             * XContentBuilder content = XContentFactory.jsonBuilder();
+             * .startObject() // 索引库名（类似数据库中的表）
+             * 
+             * 
+             * 
+             * 
+             * 
+             * 
+             * 
+             * .startObject(type).startObject("_timestamp").field("enabled",
+             * true).field("store", "yes").field("path", ES_CREATETIME)
+             * .field("format",
+             * "yyyy-MM-dd HH:mm:ss").endObject().startObject("properties"
+             * ).startObject("id").field("type", "string")
+             * .endObject().startObject("title").field("type",
+             * "string").endObject().startObject(ES_PATH).field("type",
+             * "string").endObject() .startObject(ES_CREATETIME).field("type",
+             * "date").field("store", "yes").field("format",
+             * "yyyy-MM-dd HH:mm:ss").endObject()
+             * .startObject(ES_DESCRIPTION).field("type",
+             * "multi_field").field("index", "analyzed").startObject("fields")
+             * .startObject(ES_DESCRIPTION).field("type",
+             * "string").field("store", "yes").field("index", "analyzed")
+             * .field("indexAnalyzer", "ik").field("searchAnalyzer",
+             * "ik").field("term_vector", "with_positions_offsets")
+             * .field("boost", 4.0) // 打分(默认1.0)
+             * .endObject().startObject("py").field("type",
+             * "string").field("store", "yes").field("index", "analyzed")
+             * .field("indexAnalyzer",
+             * "pinyin_analyzer").field("searchAnalyzer", "pinyin_analyzer")
+             * .field("term_vector",
+             * "with_positions_offsets").field("include_in_all",
+             * "false").field("boost", 4.0) // 打分(默认1.0)
+             * .endObject().endObject()
+             * .endObject().endObject().endObject().endObject();
+             */
             logger.debug(LogUtils.format("----------------映射字符串---------------", content.string()));
             return content.string();
-        } catch (Exception e) {
+        } catch (IOException e) {
             logger.debug("构建映射字符串失败 " + LogUtils.format("type", type), e);
-            throw new Exception("构建映射字符串失败", e);
+            throw new IOException("构建映射字符串失败", e);
         }
     }
 
@@ -686,35 +593,6 @@ public abstract class AbstractIESService implements IESService {
             // 构建搜索
             SearchResult result = searchResultExecute(indexName, indexType, builder);
             Map<String, Object> resultMap = searchResultHandler(result, hlFields, pageNow, pageSize);
-            logger.debug("--------------------------------结果--------------------------" + LogUtils.format("r", resultMap));
-            return resultMap;
-        } catch (IOException e) {
-            logger.error("查询失败 ", e);
-            throw new IOException("查询失败 ", e);
-        }
-    }
-    
-    /**
-     * poc
-     * @param indexName
-     * @param indexType
-     * @param queryQuery
-     * @param isHighlight
-     * @param hlFields
-     * @param similarityFields
-     * @param keywords
-     * @param pageNow
-     * @param pageSize
-     * @return
-     * @throws IOException
-     */
-    protected Map<String, Object> documentSearch(String indexName, String indexType, QueryBuilder queryQuery, Boolean isHighlight, List<String> hlFields,
-            List<String> similarityFields, String keywords, Integer pageNow, Integer pageSize) throws IOException {
-        try {
-            Builder builder = getSearchBuilder(queryQuery, isHighlight, hlFields);
-            // 构建搜索
-            SearchResult result = searchResultExecute(indexName, indexType, builder);
-            Map<String, Object> resultMap = searchResultHandler(result, similarityFields, keywords, pageNow, pageSize);
             logger.debug("--------------------------------结果--------------------------" + LogUtils.format("r", resultMap));
             return resultMap;
         } catch (IOException e) {
@@ -893,38 +771,15 @@ public abstract class AbstractIESService implements IESService {
      *            页大小
      * @return Builder
      */
-    protected Builder getSearchBuilder(QueryBuilder queryQuery, Boolean isHighlight, List<String> hlFields, Integer pageNow, Integer pageSize) {
+    private Builder getSearchBuilder(QueryBuilder queryQuery, Boolean isHighlight, List<String> hlFields, Integer pageNow, Integer pageSize) {
         SearchSourceBuilder ssb = searchSourceBuilder.query(queryQuery);
         // 设置分页
-        ssb.from(0).size(ES_TOTAL_COUNT);
+        ssb.from(Pagination.getCurrentNum(pageNow, pageSize)).size(pageSize);
         // 设置排序方式
         // ssb.sort("_score", SortOrder.DESC);
         if (isHighlight) {
             HighlightBuilder highlight = SearchSourceBuilder.highlight().requireFieldMatch(true).noMatchSize(10).field("content.en", 100, 1, 10);
-            HighlightBuilder hlb = highlight.preTags(ES_BEGIN_TAG).postTags(ES_END_TAG);
-            if (null != hlFields) {
-                for (String field : hlFields) {
-                    hlb.field(field);
-                }
-            }
-            ssb.highlight(hlb);
-        }
-        if (logger.isDebugEnabled()) {
-            logger.debug("query string: " + ssb.toString());
-        }
-        Builder builder = new Search.Builder(ssb.toString());
-        return builder;
-    }
-    
-    protected Builder getSearchBuilder(QueryBuilder queryQuery, Boolean isHighlight, List<String> hlFields) {
-        SearchSourceBuilder ssb = searchSourceBuilder.query(queryQuery);
-        // 设置分页
-        ssb.from(0).size(ES_TOTAL_COUNT);
-        // 设置排序方式
-        // ssb.sort("_score", SortOrder.DESC);
-        if (isHighlight) {
-            HighlightBuilder highlight = SearchSourceBuilder.highlight().requireFieldMatch(true);
-            HighlightBuilder hlb = highlight.preTags(ES_BEGIN_TAG).postTags(ES_END_TAG);
+            HighlightBuilder hlb = highlight.preTags("<b>").postTags("</b>");
             if (null != hlFields) {
                 for (String field : hlFields) {
                     hlb.field(field);
@@ -1069,68 +924,6 @@ public abstract class AbstractIESService implements IESService {
             }
         }
         return list;
-    }
-    
-    /**
-     * 查询结果处理
-     * 
-     * @param result
-     *            待处理的查询结果
-     * @param fields
-     *            查询字段
-     * @param pageNow
-     *            当前页
-     * @param pageSize
-     *            页大小
-     * @return Map<String, Object>
-     */
-    @SuppressWarnings({ "rawtypes" })
-    private Map<String, Object> searchResultHandler(SearchResult result, List<String> similarityFields, String keywords, Integer pageNow, Integer pageSize) {
-        Map<String, Object> map = new HashMap<String, Object>();
-        List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
-        Pagination p = null;
-        Integer totalCount = 0;
-        if (null != result && result.isSucceeded()) {
-            // 构建分页对象
-//            p = getPagination(result, pageNow, pageSize);
-            // 获取命中对象
-            List<Hit<Map, Void>> hits = result.getHits(Map.class);
-            for (Hit<Map, Void> hit : hits) {
-                // 得到高亮标识的Map
-                Map<String, Object> source = getHighlightMap(hit, similarityFields, keywords);
-                list.add(source);
-            }
-        }
-        Collections.sort(list, new Comparator<Map<String, Object>>() {
-            @Override
-            public int compare(Map<String, Object> o1, Map<String, Object> o2) {
-                double s1 = (Double) o1.get("MATCHING_DEGREE");
-                double s2 = (Double) o2.get("MATCHING_DEGREE");
-                if (s2 > s1) {
-                    return 1;
-                } else if (s2 == s1) {
-                    return 0;
-                } else {
-                    return -1;
-                }
-            }
-        });
-        if(null != list && !list.isEmpty()){
-            p = new Pagination(pageNow, pageSize, list, list.size());
-        }else{
-            p = new Pagination();
-        }
-        // 当前页
-        map.put(ES_PAGE_ID, pageNow);
-        // 页大小
-        map.put(ES_PAGE_SIZE, pageSize);
-        // 总页数
-        map.put(ES_TOTAL_PAGE, null == p ? 1 : p.getTotalPage());
-        // 总记录数
-        map.put(ES_TOTAL_SIZE, list.size());
-        // 结果集
-        map.put(ES_RESULT, list);
-        return map;
     }
 
     /**
@@ -1281,11 +1074,6 @@ public abstract class AbstractIESService implements IESService {
         return p;
     }
 
-    private void setSimilarity(String keywords, Map<String, Object> source, String c) {
-        double similarity = SimilarityUtils.similarity(keywords, c);
-        source.put("MATCHING_DEGREE", similarity);
-    }
-    
     private void setSimilarity(String keywords, ESDto source, String c) {
         double similarity = SimilarityUtils.similarity(keywords, c);
         source.setSimilarity(similarity);
@@ -1383,99 +1171,22 @@ public abstract class AbstractIESService implements IESService {
      * @return Map<String, Object>
      */
     @SuppressWarnings({ "unchecked", "rawtypes" })
-    protected Map<String, Object> getHighlightMap(Hit<Map, Void> hit, List<String> similarityFields, String keywords) {
+    protected Map<String, Object> getHighlightMap(List<String> hlFields, Hit<Map, Void> hit, String keywords) {
         Map<String, Object> source = hit.source;
-        //拼接原始字段值
-        StringBuilder sb = new StringBuilder();
-        for (Map.Entry<String, Object> entry : source.entrySet()) {
-            if(similarityFields.contains(entry.getKey())){
-                sb.append(entry.getValue());
-            }
-        }
         Map<String, List<String>> highlight = hit.highlight;
         if (null != highlight) {
-            
-//            List<String> names = highlight.get("NAME");
-            List<String> nameEn = highlight.get("NAME.en");
-            List<String> namePyNone = highlight.get("NAME.py_none");
-            List<String> namePyOnly = highlight.get("NAME.py_only");
-            List<String> nameT2S = highlight.get("NAME.t2s");
-            List<String> nameRussian = highlight.get("NAME.russian");
-            List<String> nameFrench = highlight.get("NAME.french");
-            List<String> namePrototype = highlight.get("NAME.prototype");
-            List<String> nameRaw = highlight.get("NAME.raw");
-            
-            if (null != namePyNone && namePyNone.get(0).indexOf(ES_BEGIN_TAG)> -1 && namePyNone.get(0).indexOf(ES_END_TAG) > -1) {
-                String chinieseToPinyin = PinYin4jUtils.chinieseToPinyin(sb.toString());
-                setSimilarity(keywords, source, chinieseToPinyin);
-                source.put("NAME", namePyNone.get(0));
-            }else if(null != namePyOnly && namePyOnly.get(0).indexOf(ES_BEGIN_TAG)> -1 && namePyOnly.get(0).indexOf(ES_END_TAG) > -1){
-                String chinieseToPinyin = PinYin4jUtils.getPinYinHeadChar(sb.toString());
-                setSimilarity(keywords, source, chinieseToPinyin);
-                source.put("NAME", namePyOnly.get(0));
-            }else if(null != nameEn && nameEn.get(0).indexOf(ES_BEGIN_TAG)> -1 && nameEn.get(0).indexOf(ES_END_TAG) > -1) {
-                setSimilarity(keywords, source, sb.toString());
-                source.put("NAME", nameEn.get(0));
-            }else if(null != namePrototype && namePrototype.get(0).indexOf(ES_BEGIN_TAG)> -1 && namePrototype.get(0).indexOf(ES_END_TAG) > -1) {
-                setSimilarity(keywords, source, sb.toString());
-                source.put("NAME", namePrototype.get(0));
-            }else if (null != nameT2S && nameT2S.get(0).indexOf(ES_BEGIN_TAG)> -1 && nameT2S.get(0).indexOf(ES_END_TAG) > -1) {
-                setSimilarity(keywords, source, sb.toString());
-                source.put("NAME", nameT2S.get(0));
-            }else if (null != nameRussian && nameRussian.get(0).indexOf(ES_BEGIN_TAG)> -1 && nameRussian.get(0).indexOf(ES_END_TAG) > -1) {
-                setSimilarity(keywords, source, sb.toString());
-                source.put("NAME", nameRussian.get(0));
-            }else if (null != nameFrench && nameFrench.get(0).indexOf(ES_BEGIN_TAG)> -1 && nameFrench.get(0).indexOf(ES_END_TAG) > -1) {
-                setSimilarity(keywords, source, sb.toString());
-                source.put("NAME", nameFrench.get(0));
-            }else if (null != nameRaw && nameRaw.get(0).indexOf(ES_BEGIN_TAG)> -1 && nameRaw.get(0).indexOf(ES_END_TAG) > -1) {
-                setSimilarity(keywords, source, sb.toString());
-                source.put("NAME", nameRaw.get(0));
-            }
-            
-            List<String> country = highlight.get("COUNTRY");
-            List<String> countryEn = highlight.get("COUNTRY.en");
-            List<String> countryPyNone = highlight.get("COUNTRY.py_none");
-            List<String> countryPyOnly = highlight.get("COUNTRY.py_only");
-            List<String> countryT2S = highlight.get("COUNTRY.t2s");
-            List<String> countryRussian = highlight.get("COUNTRY.russian");
-            List<String> countryFrench = highlight.get("COUNTRY.french");
-            List<String> countryPrototype = highlight.get("COUNTRY.prototype");
-            List<String> countryRaw = highlight.get("COUNTRY.raw");
-            if (null != country && country.get(0).indexOf(ES_BEGIN_TAG)> -1 && country.get(0).indexOf(ES_END_TAG) > -1) {
-                setSimilarity(keywords, source, sb.toString());
-                source.put("COUNTRY", country.get(0));
-            }else if (null != countryPyNone && countryPyNone.get(0).indexOf(ES_BEGIN_TAG)> -1 && countryPyNone.get(0).indexOf(ES_END_TAG) > -1) {
-                String chinieseToPinyin = PinYin4jUtils.chinieseToPinyin(sb.toString());
-                setSimilarity(keywords, source, chinieseToPinyin);
-                source.put("COUNTRY", countryPyNone.get(0));
-            }else if(null != countryPyOnly && countryPyOnly.get(0).indexOf(ES_BEGIN_TAG)> -1 && countryPyOnly.get(0).indexOf(ES_END_TAG) > -1){
-                String chinieseToPinyin = PinYin4jUtils.getPinYinHeadChar(sb.toString());
-                setSimilarity(keywords, source, chinieseToPinyin);
-                source.put("COUNTRY", countryPyOnly.get(0));
-            }else if(null != countryEn && countryEn.get(0).indexOf(ES_BEGIN_TAG)> -1 && countryEn.get(0).indexOf(ES_END_TAG) > -1) {
-                setSimilarity(keywords, source, sb.toString());
-                source.put("COUNTRY", countryEn.get(0));
-            }else if(null != countryPrototype && countryPrototype.get(0).indexOf(ES_BEGIN_TAG)> -1 && countryPrototype.get(0).indexOf(ES_END_TAG) > -1) {
-                setSimilarity(keywords, source, sb.toString());
-                source.put("COUNTRY", countryPrototype.get(0));
-            }else if (null != countryT2S && countryT2S.get(0).indexOf(ES_BEGIN_TAG)> -1 && countryT2S.get(0).indexOf(ES_END_TAG) > -1) {
-                setSimilarity(keywords, source, sb.toString());
-                source.put("COUNTRY", countryT2S.get(0));
-            }else if (null != countryRussian && countryRussian.get(0).indexOf(ES_BEGIN_TAG)> -1 && countryRussian.get(0).indexOf(ES_END_TAG) > -1) {
-                setSimilarity(keywords, source, sb.toString());
-                source.put("COUNTRY", countryRussian.get(0));
-            }else if (null != countryFrench && countryFrench.get(0).indexOf(ES_BEGIN_TAG)> -1 && countryFrench.get(0).indexOf(ES_END_TAG) > -1) {
-                setSimilarity(keywords, source, sb.toString());
-                source.put("COUNTRY", countryFrench.get(0));
-            }else if (null != countryRaw && countryRaw.get(0).indexOf(ES_BEGIN_TAG)> -1 && countryRaw.get(0).indexOf(ES_END_TAG) > -1) {
-                setSimilarity(keywords, source, sb.toString());
-                source.put("COUNTRY", countryRaw.get(0));
+            if (null != hlFields) {
+                for (String field : hlFields) {
+                    if (highlight.containsKey(field)) {
+                        List<String> h = highlight.get(field);
+                        source.put(field, h.get(0));
+                    }
+                }
             }
         }
         return source;
     }
-    
+
     /**
      * 根据关键字带分页的搜索文档
      * 
@@ -1690,12 +1401,6 @@ public abstract class AbstractIESService implements IESService {
                 queryStrBuilder.field(field);
             }
         }
-    }
-    
-    protected QueryStringQueryBuilder queryStringBuilder(List<String> fields, String value) {
-        QueryStringQueryBuilder queryStrBuilder = QueryBuilders.queryString("*" + value + "*");
-        setQueryBuilderField(fields, queryStrBuilder);
-        return queryStrBuilder.allowLeadingWildcard(true).analyzeWildcard(true);
     }
 
     /**

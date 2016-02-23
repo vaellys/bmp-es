@@ -185,4 +185,8 @@ public interface IESService {
 
     boolean dirHandler(String indexName, String indexType, String path, Integer action) throws IOException;
 
+    public Map<String, Object> documentSearch(String indexName, String indexType, String keywords, Integer pageNow, Integer pageSize) throws IOException;
+
+    public boolean deleteIndex(String indexName) throws IOException;
+
 }

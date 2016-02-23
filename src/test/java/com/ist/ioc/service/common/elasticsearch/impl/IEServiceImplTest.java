@@ -48,6 +48,10 @@ public class IEServiceImplTest extends AbstractJUnit4SpringContextTests {
     public void tearDown() throws Exception {
     }
 
+    /**
+     * 建索引
+     * 测试拼音分词
+     */
     @Test
     public void testDocumentHandler() {
 
@@ -67,6 +71,10 @@ public class IEServiceImplTest extends AbstractJUnit4SpringContextTests {
         }
     }
 
+    /**
+     * 建索引
+     * 测试中文分词
+     */
     @Test
     public void testDocumentHandler2() {
 
@@ -86,6 +94,10 @@ public class IEServiceImplTest extends AbstractJUnit4SpringContextTests {
         }
     }
 
+    
+    /**
+     * 测试英文分词
+     */
     @Test
     public void testDocumentHandlerByEng() {
 
@@ -105,6 +117,9 @@ public class IEServiceImplTest extends AbstractJUnit4SpringContextTests {
         }
     }
 
+    /**
+     * 拼音搜索
+     */
     @Test
     public void testDocumentSearch() {
         try {

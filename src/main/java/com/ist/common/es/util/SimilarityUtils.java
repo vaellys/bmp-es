@@ -131,8 +131,8 @@ public class SimilarityUtils {
     }
 
     public static void main(String[] args) {
-        String src = "中国";
-        String tar = "您好中国哈哈";
+        String src = "mi";
+        String tar = "张三 李四 王五 章三 smith中国";
         // String src = "hello world!";
         // String tar = "hello";
         System.out.println("sim=" + SimilarityUtils.similarity(src, tar));

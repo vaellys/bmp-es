@@ -1,14 +1,6 @@
 package com.ist.ioc.service.common.elasticsearch.impl;
 
-import static com.ist.ioc.service.common.Constants.ES_RESULT;
-import static com.ist.ioc.service.common.Constants.ES_SCORE;
-import static com.ist.ioc.service.common.Constants.ES_SCORE_MATCH_FUZZY;
-import static com.ist.ioc.service.common.Constants.ES_SCORE_MATCH_QUERY_STR;
-import static com.ist.ioc.service.common.Constants.ES_SCORE_MATCH_SLOP_1;
-import static com.ist.ioc.service.common.Constants.ES_SCORE_MATCH_SLOP_2;
-import static com.ist.ioc.service.common.Constants.ES_SCORE_MATCH_SLOP_3;
-import static com.ist.ioc.service.common.Constants.ES_SCORE_NOT_MUST_MATCH;
-import static com.ist.ioc.service.common.Constants.ES_SCORE_PERFECT_MATCH;
+import static com.ist.ioc.service.common.Constants.*;
 
 import java.io.File;
 import java.io.IOException;
@@ -32,6 +24,7 @@ import org.elasticsearch.index.query.MatchQueryBuilder;
 import org.elasticsearch.index.query.MultiMatchQueryBuilder;
 import org.elasticsearch.index.query.QueryStringQueryBuilder;
 import org.elasticsearch.index.query.TermQueryBuilder;
+import org.elasticsearch.index.query.WildcardQueryBuilder;
 import org.elasticsearch.index.query.functionscore.FunctionScoreQueryBuilder;
 
 import com.ist.common.es.util.FileUtils;
@@ -40,12 +33,13 @@ import com.ist.common.es.util.ParseDocumentUtil;
 import com.ist.common.es.util.page.Pagination;
 import com.ist.dto.bmp.ESDto;
 import com.ist.ioc.service.common.elasticsearch.AbstractIESService;
+import com.ist.ioc.service.common.elasticsearch.IESProvider;
 
 public class IESServiceImpl extends AbstractIESService {
     private static final Log logger = LogFactory.getLog(IESServiceImpl.class);
     
     private static final String FILE_UPLOAD_DIR = "c:/awp_data/upload/";
-
+    
     @Override
     public Map<String, Object> documentSearch(List<String> indexNames, List<String> indexTypes, List<String> queryFields, List<String> hlFields, String keywords, Integer pageNow, Integer pageSize)
             throws IOException {
@@ -464,4 +458,57 @@ public class IESServiceImpl extends AbstractIESService {
         return false;
     }
     
+    private List<String> buildFieldList(List<String> prefixes, List<String> suffixes){
+        List<String> newList = new ArrayList<String>();
+        for (String prefix : prefixes) {
+            for(String suffix : suffixes){
+                String field = prefix + "." + suffix;
+                newList.add(field);
+            }
+            newList.add(prefix);
+        }
+        return newList;
+    }
+    
+    public Map<String, Object> documentSearch(String indexName, String indexType, String keywords, Integer pageNow,
+            Integer pageSize) throws IOException {
+        try {
+            if (logger.isDebugEnabled()) {
+                logger.debug("requestParams:"
+                        + LogUtils.format("indexNames", indexName, "indexTypes", indexType, "keywords", keywords, "pageNow", pageNow, "pageSize",
+                                pageSize));
+            }
+            List<String> fields = new ArrayList<String>();
+            fields.add("NAME");
+            fields.add("COUNTRY");
+            List<String> hlSubFields = new ArrayList<String>();
+            hlSubFields.add("en");
+            hlSubFields.add("t2s");
+            hlSubFields.add("russian");
+            hlSubFields.add("py_only");
+            hlSubFields.add("py_none");
+            hlSubFields.add("french");
+            hlSubFields.add("prototype");
+            hlSubFields.add("raw");
+            List<String> hlFields = buildFieldList(fields, hlSubFields);
+            BoolQueryBuilder boolQueryBuilder = this.boolQueryBuilder();
+            QueryStringQueryBuilder queryStringBuilder = this.queryStringBuilder(keywords, hlFields);
+//            FuzzyQueryBuilder nameFuzzyBuilder = this.fuzzyBuilder("NAME.prototype", keywords, Fuzziness.TWO);
+//            FuzzyQueryBuilder countryFuzzyBuilder = this.fuzzyBuilder("COUNTRY.prototype", keywords, Fuzziness.TWO);
+            WildcardQueryBuilder nameWildcardBuilder = this.wildcardBuilder("NAME.raw", keywords);
+            WildcardQueryBuilder countryWildcardBuilder = this.wildcardBuilder("COUNTRY.raw", keywords);
+            
+            boolQueryBuilder.should(queryStringBuilder).should(nameWildcardBuilder).should(countryWildcardBuilder);
+            List<String> similarityFields = new ArrayList<String>();
+            similarityFields.add("NAME");
+            similarityFields.add("COUNTRY");
+            return this.documentSearch(indexName, indexType, boolQueryBuilder, true, hlFields, similarityFields, keywords, Pagination.cpn(pageNow), Pagination.cps(pageSize));
+        } catch (IOException e) {
+            logger.error(
+                    "搜索失败"
+                            + LogUtils.format("indexNames", indexName, "indexTypes", indexType, "keywords", keywords, "pageNow", pageNow,
+                                    "pageSize", pageSize), e);
+            throw new IOException("搜索失败", e);
+        }
+    }
 }
