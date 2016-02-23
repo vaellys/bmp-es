@@ -1,6 +1,14 @@
 package com.ist.ioc.service.common.elasticsearch.impl;
 
-import static com.ist.ioc.service.common.Constants.*;
+import static com.ist.ioc.service.common.Constants.ES_RESULT;
+import static com.ist.ioc.service.common.Constants.ES_SCORE;
+import static com.ist.ioc.service.common.Constants.ES_SCORE_MATCH_FUZZY;
+import static com.ist.ioc.service.common.Constants.ES_SCORE_MATCH_QUERY_STR;
+import static com.ist.ioc.service.common.Constants.ES_SCORE_MATCH_SLOP_1;
+import static com.ist.ioc.service.common.Constants.ES_SCORE_MATCH_SLOP_2;
+import static com.ist.ioc.service.common.Constants.ES_SCORE_MATCH_SLOP_3;
+import static com.ist.ioc.service.common.Constants.ES_SCORE_NOT_MUST_MATCH;
+import static com.ist.ioc.service.common.Constants.ES_SCORE_PERFECT_MATCH;
 
 import java.io.File;
 import java.io.IOException;
@@ -33,7 +41,6 @@ import com.ist.common.es.util.ParseDocumentUtil;
 import com.ist.common.es.util.page.Pagination;
 import com.ist.dto.bmp.ESDto;
 import com.ist.ioc.service.common.elasticsearch.AbstractIESService;
-import com.ist.ioc.service.common.elasticsearch.IESProvider;
 
 public class IESServiceImpl extends AbstractIESService {
     private static final Log logger = LogFactory.getLog(IESServiceImpl.class);

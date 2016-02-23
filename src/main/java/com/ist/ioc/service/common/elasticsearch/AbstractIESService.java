@@ -1089,7 +1089,6 @@ public abstract class AbstractIESService implements IESService {
         Map<String, Object> map = new HashMap<String, Object>();
         List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
         Pagination p = null;
-        Integer totalCount = 0;
         if (null != result && result.isSucceeded()) {
             // 构建分页对象
 //            p = getPagination(result, pageNow, pageSize);
@@ -1129,7 +1128,7 @@ public abstract class AbstractIESService implements IESService {
         // 总记录数
         map.put(ES_TOTAL_SIZE, list.size());
         // 结果集
-        map.put(ES_RESULT, list);
+        map.put(ES_RESULT, p.getList());
         return map;
     }
 
