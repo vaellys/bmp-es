@@ -4,7 +4,7 @@ import org.apache.lucene.util.IntsRef;
 
 public class Distance {
     public static void main(String[]args){
-        int a=new Distance().getDistance("a123","123456abc", false);
+        int a=new Distance().getDistance("Xi","GreeceXiros, Savvas", false);
         System.out.println(a);
     }
     public int getDistance(char[] str1,char[] str2){

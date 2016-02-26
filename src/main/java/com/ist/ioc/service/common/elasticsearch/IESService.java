@@ -189,4 +189,7 @@ public interface IESService {
 
     public boolean deleteIndex(String indexName) throws IOException;
 
+    public Map<String, Object> documentSearch(String indexName, String indexType, Map<String, Object> mapFieldParams, Integer pageNow, Integer pageSize)
+            throws IOException;
+
 }

@@ -147,8 +147,8 @@ public class IEPOCServiceImplTest extends AbstractJUnit4SpringContextTests {
     @Test
     public void testDocumentSearch2() {
         try {
-            String keywords = "法国";
-            Map<String, Object> documentSearch = iesService.documentSearch("appletest", "iphone", keywords, 1, 10);
+            String keywords = "982601192101150015测测个CHN982601192101150015";
+            Map<String, Object> documentSearch = iesService.documentSearch("index", "wcoIndex", keywords, 1, 10);
             logger.debug(LogUtils.format("R", documentSearch));
         } catch (Exception e) {
             e.printStackTrace();
@@ -539,6 +539,25 @@ public class IEPOCServiceImplTest extends AbstractJUnit4SpringContextTests {
             }
         } catch (IOException e) {
             e.printStackTrace();
+        }
+    }
+    
+    /**
+     * 名单检索（后台）
+     */
+    @Test
+    public void testDocumentSearchWithBack() {
+        try {
+            Map<String, Object> mapFieldParams = new HashMap<String, Object>();
+            mapFieldParams.put("NAME", "Xiros, Savvas");
+            mapFieldParams.put("COUNTRY", "Greece");
+            mapFieldParams.put("PASSPORTID", "");
+            mapFieldParams.put("NATIONALID", "");
+            Map<String, Object> documentSearch = iesService.documentSearch("index", "wcoIndex", mapFieldParams, 1, 10);
+            logger.debug(LogUtils.format("R", documentSearch));
+        } catch (Exception e) {
+            e.printStackTrace();
+            fail("----------构建索引失败----------");
         }
     }
     

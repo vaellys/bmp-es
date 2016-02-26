@@ -737,6 +737,21 @@ public abstract class AbstractIESService implements IESService {
             throw new IOException("查询失败 ", e);
         }
     }
+    
+    protected Map<String, Object> documentSearch(String indexName, String indexType, QueryBuilder queryQuery, Boolean isHighlight, List<String> hlFields,
+            List<String> similarityFields, Map<String, Object> mapFieldParams, Integer pageNow, Integer pageSize) throws IOException {
+        try {
+            Builder builder = getSearchBuilder(queryQuery, isHighlight, hlFields);
+            // 构建搜索
+            SearchResult result = searchResultExecute(indexName, indexType, builder);
+            Map<String, Object> resultMap = searchResultHandler(result, similarityFields, mapFieldParams, pageNow, pageSize);
+            logger.debug("--------------------------------结果--------------------------" + LogUtils.format("r", resultMap));
+            return resultMap;
+        } catch (IOException e) {
+            logger.error("查询失败 ", e);
+            throw new IOException("查询失败 ", e);
+        }
+    }
 
     /**
      * 根据字段进行搜索
@@ -1131,6 +1146,55 @@ public abstract class AbstractIESService implements IESService {
         map.put(ES_RESULT, p.getList());
         return map;
     }
+    
+    
+    @SuppressWarnings({ "rawtypes" })
+    private Map<String, Object> searchResultHandler(SearchResult result, List<String> similarityFields, Map<String, Object> mapFieldParams, Integer pageNow, Integer pageSize) {
+        Map<String, Object> map = new HashMap<String, Object>();
+        List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
+        Pagination p = null;
+        if (null != result && result.isSucceeded()) {
+            // 构建分页对象
+//            p = getPagination(result, pageNow, pageSize);
+            // 获取命中对象
+            List<Hit<Map, Void>> hits = result.getHits(Map.class);
+            for (Hit<Map, Void> hit : hits) {
+                // 得到高亮标识的Map
+                Map<String, Object> source = getHighlightMap(hit, similarityFields, mapFieldParams);
+                list.add(source);
+            }
+        }
+        Collections.sort(list, new Comparator<Map<String, Object>>() {
+            @Override
+            public int compare(Map<String, Object> o1, Map<String, Object> o2) {
+                double s1 = (Double) o1.get("MATCHING_DEGREE");
+                double s2 = (Double) o2.get("MATCHING_DEGREE");
+                if (s2 > s1) {
+                    return 1;
+                } else if (s2 == s1) {
+                    return 0;
+                } else {
+                    return -1;
+                }
+            }
+        });
+        if(null != list && !list.isEmpty()){
+            p = new Pagination(pageNow, pageSize, list, list.size());
+        }else{
+            p = new Pagination();
+        }
+        // 当前页
+        map.put(ES_PAGE_ID, pageNow);
+        // 页大小
+        map.put(ES_PAGE_SIZE, pageSize);
+        // 总页数
+        map.put(ES_TOTAL_PAGE, null == p ? 1 : p.getTotalPage());
+        // 总记录数
+        map.put(ES_TOTAL_SIZE, list.size());
+        // 结果集
+        map.put(ES_RESULT, p.getList());
+        return map;
+    }
 
     /**
      * 查询结果处理
@@ -1403,6 +1467,118 @@ public abstract class AbstractIESService implements IESService {
             List<String> nameFrench = highlight.get("NAME.french");
             List<String> namePrototype = highlight.get("NAME.prototype");
             List<String> nameRaw = highlight.get("NAME.raw");
+            if (null != nameRaw && nameRaw.get(0).indexOf(ES_BEGIN_TAG)> -1 && nameRaw.get(0).indexOf(ES_END_TAG) > -1) {
+                setSimilarity(keywords, source, sb.toString());
+                source.put("NAME", nameRaw.get(0));
+            }else if (null != namePyNone && namePyNone.get(0).indexOf(ES_BEGIN_TAG)> -1 && namePyNone.get(0).indexOf(ES_END_TAG) > -1) {
+                String chinieseToPinyin = PinYin4jUtils.chinieseToPinyin(sb.toString());
+                setSimilarity(keywords, source, chinieseToPinyin);
+                source.put("NAME", namePyNone.get(0));
+            }else if(null != namePyOnly && namePyOnly.get(0).indexOf(ES_BEGIN_TAG)> -1 && namePyOnly.get(0).indexOf(ES_END_TAG) > -1){
+                String chinieseToPinyin = PinYin4jUtils.getPinYinHeadChar(sb.toString());
+                setSimilarity(keywords, source, chinieseToPinyin);
+                source.put("NAME", namePyOnly.get(0));
+            }else if(null != nameEn && nameEn.get(0).indexOf(ES_BEGIN_TAG)> -1 && nameEn.get(0).indexOf(ES_END_TAG) > -1) {
+                setSimilarity(keywords, source, sb.toString());
+                source.put("NAME", nameEn.get(0));
+            }else if(null != namePrototype && namePrototype.get(0).indexOf(ES_BEGIN_TAG)> -1 && namePrototype.get(0).indexOf(ES_END_TAG) > -1) {
+                setSimilarity(keywords, source, sb.toString());
+                source.put("NAME", namePrototype.get(0));
+            }else if (null != nameT2S && nameT2S.get(0).indexOf(ES_BEGIN_TAG)> -1 && nameT2S.get(0).indexOf(ES_END_TAG) > -1) {
+                setSimilarity(keywords, source, sb.toString());
+                source.put("NAME", nameT2S.get(0));
+            }else if (null != nameRussian && nameRussian.get(0).indexOf(ES_BEGIN_TAG)> -1 && nameRussian.get(0).indexOf(ES_END_TAG) > -1) {
+                setSimilarity(keywords, source, sb.toString());
+                source.put("NAME", nameRussian.get(0));
+            }else if (null != nameFrench && nameFrench.get(0).indexOf(ES_BEGIN_TAG)> -1 && nameFrench.get(0).indexOf(ES_END_TAG) > -1) {
+                setSimilarity(keywords, source, sb.toString());
+                source.put("NAME", nameFrench.get(0));
+            }
+            
+            List<String> country = highlight.get("COUNTRY");
+            List<String> countryEn = highlight.get("COUNTRY.en");
+            List<String> countryPyNone = highlight.get("COUNTRY.py_none");
+            List<String> countryPyOnly = highlight.get("COUNTRY.py_only");
+            List<String> countryT2S = highlight.get("COUNTRY.t2s");
+            List<String> countryRussian = highlight.get("COUNTRY.russian");
+            List<String> countryFrench = highlight.get("COUNTRY.french");
+            List<String> countryPrototype = highlight.get("COUNTRY.prototype");
+            List<String> countryRaw = highlight.get("COUNTRY.raw");
+            if (null != country && country.get(0).indexOf(ES_BEGIN_TAG)> -1 && country.get(0).indexOf(ES_END_TAG) > -1) {
+                setSimilarity(keywords, source, sb.toString());
+                source.put("COUNTRY", country.get(0));
+            }else if (null != countryPyNone && countryPyNone.get(0).indexOf(ES_BEGIN_TAG)> -1 && countryPyNone.get(0).indexOf(ES_END_TAG) > -1) {
+                String chinieseToPinyin = PinYin4jUtils.chinieseToPinyin(sb.toString());
+                setSimilarity(keywords, source, chinieseToPinyin);
+                source.put("COUNTRY", countryPyNone.get(0));
+            }else if(null != countryPyOnly && countryPyOnly.get(0).indexOf(ES_BEGIN_TAG)> -1 && countryPyOnly.get(0).indexOf(ES_END_TAG) > -1){
+                String chinieseToPinyin = PinYin4jUtils.getPinYinHeadChar(sb.toString());
+                setSimilarity(keywords, source, chinieseToPinyin);
+                source.put("COUNTRY", countryPyOnly.get(0));
+            }else if(null != countryEn && countryEn.get(0).indexOf(ES_BEGIN_TAG)> -1 && countryEn.get(0).indexOf(ES_END_TAG) > -1) {
+                setSimilarity(keywords, source, sb.toString());
+                source.put("COUNTRY", countryEn.get(0));
+            }else if(null != countryPrototype && countryPrototype.get(0).indexOf(ES_BEGIN_TAG)> -1 && countryPrototype.get(0).indexOf(ES_END_TAG) > -1) {
+                setSimilarity(keywords, source, sb.toString());
+                source.put("COUNTRY", countryPrototype.get(0));
+            }else if (null != countryT2S && countryT2S.get(0).indexOf(ES_BEGIN_TAG)> -1 && countryT2S.get(0).indexOf(ES_END_TAG) > -1) {
+                setSimilarity(keywords, source, sb.toString());
+                source.put("COUNTRY", countryT2S.get(0));
+            }else if (null != countryRussian && countryRussian.get(0).indexOf(ES_BEGIN_TAG)> -1 && countryRussian.get(0).indexOf(ES_END_TAG) > -1) {
+                setSimilarity(keywords, source, sb.toString());
+                source.put("COUNTRY", countryRussian.get(0));
+            }else if (null != countryFrench && countryFrench.get(0).indexOf(ES_BEGIN_TAG)> -1 && countryFrench.get(0).indexOf(ES_END_TAG) > -1) {
+                setSimilarity(keywords, source, sb.toString());
+                source.put("COUNTRY", countryFrench.get(0));
+            }else if (null != countryRaw && countryRaw.get(0).indexOf(ES_BEGIN_TAG)> -1 && countryRaw.get(0).indexOf(ES_END_TAG) > -1) {
+                setSimilarity(keywords, source, sb.toString());
+                source.put("COUNTRY", countryRaw.get(0));
+            }
+        }
+        
+        List<String> nationalid = highlight.get("NATIONALID");
+        if (null != nationalid && nationalid.get(0).indexOf(ES_BEGIN_TAG)> -1 && nationalid.get(0).indexOf(ES_END_TAG) > -1) {
+            setSimilarity(keywords, source, sb.toString());
+            source.put("NATIONALID", nationalid.get(0));
+        }
+        List<String> passportid = highlight.get("PASSPORTID");
+        if (null != passportid && passportid.get(0).indexOf(ES_BEGIN_TAG)> -1 && passportid.get(0).indexOf(ES_END_TAG) > -1) {
+            setSimilarity(keywords, source, sb.toString());
+            source.put("PASSPORTID", passportid.get(0));
+        }
+        return source;
+    }
+    
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    protected Map<String, Object> getHighlightMap(Hit<Map, Void> hit, List<String> similarityFields, Map<String, Object> mapFieldParams) {
+        Map<String, Object> source = hit.source;
+        
+      //拼接原始字段值
+        StringBuilder sbSource = new StringBuilder();
+        StringBuilder sb = new StringBuilder();
+        for (Map.Entry<String, Object> entry : mapFieldParams.entrySet()) {
+            sbSource.append(entry.getValue());
+            for (Map.Entry<String, Object> entryTarget : source.entrySet()) {
+                if(entry.getKey().equals(entryTarget.getKey())){
+                    sb.append(entryTarget.getValue());
+                    break;
+                }
+            }
+        }
+        String keywords = sbSource.toString();
+        
+        Map<String, List<String>> highlight = hit.highlight;
+        if (null != highlight) {
+            
+//            List<String> names = highlight.get("NAME");
+            List<String> nameEn = highlight.get("NAME.en");
+            List<String> namePyNone = highlight.get("NAME.py_none");
+            List<String> namePyOnly = highlight.get("NAME.py_only");
+            List<String> nameT2S = highlight.get("NAME.t2s");
+            List<String> nameRussian = highlight.get("NAME.russian");
+            List<String> nameFrench = highlight.get("NAME.french");
+            List<String> namePrototype = highlight.get("NAME.prototype");
+            List<String> nameRaw = highlight.get("NAME.raw");
             
             if (null != namePyNone && namePyNone.get(0).indexOf(ES_BEGIN_TAG)> -1 && namePyNone.get(0).indexOf(ES_END_TAG) > -1) {
                 String chinieseToPinyin = PinYin4jUtils.chinieseToPinyin(sb.toString());
@@ -1470,6 +1646,16 @@ public abstract class AbstractIESService implements IESService {
             }else if (null != countryRaw && countryRaw.get(0).indexOf(ES_BEGIN_TAG)> -1 && countryRaw.get(0).indexOf(ES_END_TAG) > -1) {
                 setSimilarity(keywords, source, sb.toString());
                 source.put("COUNTRY", countryRaw.get(0));
+            }
+            List<String> nationalid = highlight.get("NATIONALID");
+            if (null != nationalid && nationalid.get(0).indexOf(ES_BEGIN_TAG)> -1 && nationalid.get(0).indexOf(ES_END_TAG) > -1) {
+                setSimilarity(keywords, source, sb.toString());
+                source.put("NATIONALID", nationalid.get(0));
+            }
+            List<String> passportid = highlight.get("PASSPORTID");
+            if (null != passportid && passportid.get(0).indexOf(ES_BEGIN_TAG)> -1 && passportid.get(0).indexOf(ES_END_TAG) > -1) {
+                setSimilarity(keywords, source, sb.toString());
+                source.put("PASSPORTID", passportid.get(0));
             }
         }
         return source;

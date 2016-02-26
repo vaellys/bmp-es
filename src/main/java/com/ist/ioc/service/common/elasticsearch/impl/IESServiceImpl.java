@@ -9,6 +9,8 @@ import static com.ist.ioc.service.common.Constants.ES_SCORE_MATCH_SLOP_2;
 import static com.ist.ioc.service.common.Constants.ES_SCORE_MATCH_SLOP_3;
 import static com.ist.ioc.service.common.Constants.ES_SCORE_NOT_MUST_MATCH;
 import static com.ist.ioc.service.common.Constants.ES_SCORE_PERFECT_MATCH;
+import io.searchbox.core.SearchResult;
+import io.searchbox.core.Search.Builder;
 
 import java.io.File;
 import java.io.IOException;
@@ -30,6 +32,7 @@ import org.elasticsearch.index.query.FuzzyQueryBuilder;
 import org.elasticsearch.index.query.MatchAllQueryBuilder;
 import org.elasticsearch.index.query.MatchQueryBuilder;
 import org.elasticsearch.index.query.MultiMatchQueryBuilder;
+import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryStringQueryBuilder;
 import org.elasticsearch.index.query.TermQueryBuilder;
 import org.elasticsearch.index.query.WildcardQueryBuilder;
@@ -485,30 +488,23 @@ public class IESServiceImpl extends AbstractIESService {
                         + LogUtils.format("indexNames", indexName, "indexTypes", indexType, "keywords", keywords, "pageNow", pageNow, "pageSize",
                                 pageSize));
             }
-            List<String> fields = new ArrayList<String>();
-            fields.add("NAME");
-            fields.add("COUNTRY");
-            List<String> hlSubFields = new ArrayList<String>();
-            hlSubFields.add("en");
-            hlSubFields.add("t2s");
-            hlSubFields.add("russian");
-            hlSubFields.add("py_only");
-            hlSubFields.add("py_none");
-            hlSubFields.add("french");
-            hlSubFields.add("prototype");
-            hlSubFields.add("raw");
-            List<String> hlFields = buildFieldList(fields, hlSubFields);
+            List<String> hlFields = buildFieldList();
             BoolQueryBuilder boolQueryBuilder = this.boolQueryBuilder();
             QueryStringQueryBuilder queryStringBuilder = this.queryStringBuilder(keywords, hlFields);
 //            FuzzyQueryBuilder nameFuzzyBuilder = this.fuzzyBuilder("NAME.prototype", keywords, Fuzziness.TWO);
 //            FuzzyQueryBuilder countryFuzzyBuilder = this.fuzzyBuilder("COUNTRY.prototype", keywords, Fuzziness.TWO);
-            WildcardQueryBuilder nameWildcardBuilder = this.wildcardBuilder("NAME.raw", keywords);
-            WildcardQueryBuilder countryWildcardBuilder = this.wildcardBuilder("COUNTRY.raw", keywords);
+            if(StringUtils.isNotBlank(keywords)){
+                WildcardQueryBuilder nameWildcardBuilder = this.wildcardBuilder("NAME.prototype", keywords);
+                WildcardQueryBuilder countryWildcardBuilder = this.wildcardBuilder("COUNTRY.prototype", keywords);
+                boolQueryBuilder.should(nameWildcardBuilder).should(countryWildcardBuilder);
+            }
             
-            boolQueryBuilder.should(queryStringBuilder).should(nameWildcardBuilder).should(countryWildcardBuilder);
+            boolQueryBuilder.should(queryStringBuilder);
             List<String> similarityFields = new ArrayList<String>();
             similarityFields.add("NAME");
             similarityFields.add("COUNTRY");
+            similarityFields.add("PASSPORTID");
+            similarityFields.add("NATIONALID");
             return this.documentSearch(indexName, indexType, boolQueryBuilder, true, hlFields, similarityFields, keywords, Pagination.cpn(pageNow), Pagination.cps(pageSize));
         } catch (IOException e) {
             logger.error(
@@ -517,5 +513,79 @@ public class IESServiceImpl extends AbstractIESService {
                                     "pageSize", pageSize), e);
             throw new IOException("搜索失败", e);
         }
+    }
+
+    private List<String> buildFieldList() {
+        List<String> fields = new ArrayList<String>();
+        fields.add("NAME");
+        fields.add("COUNTRY");
+        fields.add("PASSPORTID");
+        fields.add("NATIONALID");
+        List<String> hlSubFields = buildSubFields();
+        List<String> hlFields = buildFieldList(fields, hlSubFields);
+        return hlFields;
+    }
+
+    private List<String> buildSubFields() {
+        List<String> hlSubFields = new ArrayList<String>();
+        hlSubFields.add("en");
+        hlSubFields.add("t2s");
+        hlSubFields.add("russian");
+        hlSubFields.add("py_only");
+        hlSubFields.add("py_none");
+        hlSubFields.add("french");
+        hlSubFields.add("prototype");
+        hlSubFields.add("raw");
+        return hlSubFields;
+    }
+    
+    public Map<String, Object> documentSearch(String indexName, String indexType, Map<String, Object> mapFieldParams, Integer pageNow,
+            Integer pageSize) throws IOException {
+        try {
+            if (logger.isDebugEnabled()) {
+                logger.debug("requestParams:"
+                        + LogUtils.format("indexName", indexName, "indexType", indexType));
+            }
+            List<String> subFields = buildSubFields();
+            BoolQueryBuilder boolQueryBuilder = this.boolQueryBuilder();
+            for(Map.Entry<String, Object> entry : mapFieldParams.entrySet()){
+                QueryStringQueryBuilder queryStringBuilder = this.queryStringBuilder(String.valueOf(entry.getValue()), buildFields(entry.getKey(), subFields));
+                if("NAME".equals(entry.getKey()) && entry.getValue() != null && StringUtils.isNotBlank((String)entry.getValue())){
+                    WildcardQueryBuilder nameWildcardBuilder = this.wildcardBuilder("NAME.prototype", String.valueOf(entry.getValue()));
+                    boolQueryBuilder.should(nameWildcardBuilder);
+                }
+                if("COUNTRY".equals(entry.getKey()) && entry.getValue() != null && StringUtils.isNotBlank((String)entry.getValue())){
+                    WildcardQueryBuilder countryWildcardBuilder = this.wildcardBuilder("COUNTRY.prototype", String.valueOf(entry.getValue()));
+                    boolQueryBuilder.should(countryWildcardBuilder);
+                }
+                boolQueryBuilder.should(queryStringBuilder);
+            }
+            List<String> similarityFields = new ArrayList<String>();
+            similarityFields.add("NAME");
+            similarityFields.add("COUNTRY");
+            similarityFields.add("PASSPORTID");
+            similarityFields.add("NATIONALID");
+            List<String> hlFields = buildFieldList();
+            
+            return this.documentSearch(indexName, indexType, boolQueryBuilder, true, hlFields , similarityFields, mapFieldParams, Pagination.cpn(pageNow), Pagination.cps(pageSize));
+        } catch (IOException e) {
+            logger.error(
+                    "搜索失败"
+                            + LogUtils.format("indexNames", indexName, "indexTypes", indexType), e);
+            throw new IOException("搜索失败", e);
+        }
+    }
+    
+    public List<String> buildFields(String field, List<String> subFields){
+        List<String> fields = new ArrayList<String>();
+        if(("NATIONALID".equals(field)) || ("PASSPORTID".equals(field))){
+            fields.add(field);
+        }else {
+            for (String subField : subFields) {
+                fields.add(field + "." + subField);
+            }
+            fields.add(field);
+        }
+        return fields;
     }
 }
