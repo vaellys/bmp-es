@@ -2,10 +2,13 @@ package com.ist.ioc.service.common.elasticsearch.impl;
 
 import org.apache.lucene.util.IntsRef;
 
+import com.ist.common.es.util.SimilarityUtils;
+
 public class Distance {
     public static void main(String[]args){
-        int a=new Distance().getDistance("Xi","GreeceXiros, Savvas", false);
-        System.out.println(a);
+        int a=new Distance().getDistance("Abdel-Bari, Adel Abdul Megeed","Abdel-Bari, Adel Abdul Megeed", false);
+        double similarity = SimilarityUtils.similarity("Morocco", "Egypt");
+        System.out.println(similarity);
     }
     public int getDistance(char[] str1,char[] str2){
         

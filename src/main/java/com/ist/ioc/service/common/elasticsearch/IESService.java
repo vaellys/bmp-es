@@ -192,4 +192,7 @@ public interface IESService {
     public Map<String, Object> documentSearch(String indexName, String indexType, Map<String, Object> mapFieldParams, Integer pageNow, Integer pageSize)
             throws IOException;
 
+    public Map<String, Object> documentSearch(String indexName, String indexType, Map<String, Object> mapFieldParams, Map<String, Object> mapWeightParams,
+            Integer pageNow, Integer pageSize) throws IOException;
+
 }

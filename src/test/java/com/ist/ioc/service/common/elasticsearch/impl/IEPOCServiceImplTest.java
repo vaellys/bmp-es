@@ -549,11 +549,35 @@ public class IEPOCServiceImplTest extends AbstractJUnit4SpringContextTests {
     public void testDocumentSearchWithBack() {
         try {
             Map<String, Object> mapFieldParams = new HashMap<String, Object>();
-            mapFieldParams.put("NAME", "Xiros, Savvas");
-            mapFieldParams.put("COUNTRY", "Greece");
+            mapFieldParams.put("NAME", "Abdel-Bari, Adel Abdul Megeed");
+            mapFieldParams.put("COUNTRY", "Morocco");
             mapFieldParams.put("PASSPORTID", "");
             mapFieldParams.put("NATIONALID", "");
             Map<String, Object> documentSearch = iesService.documentSearch("index", "wcoIndex", mapFieldParams, 1, 10);
+            logger.debug(LogUtils.format("R", documentSearch));
+        } catch (Exception e) {
+            e.printStackTrace();
+            fail("----------构建索引失败----------");
+        }
+    }
+    
+    /**
+     * 名单检索（后台）
+     */
+    @Test
+    public void testDocumentSearchWithBackWeight() {
+        try {
+            Map<String, Object> mapFieldParams = new HashMap<String, Object>();
+            Map<String, Object> mapWightParams = new HashMap<String, Object>();
+            mapFieldParams.put("NAME", "Abdel-Bari, Adel Abdul Megeed");
+            mapFieldParams.put("COUNTRY", "Egypt");
+            mapFieldParams.put("PASSPORTID", "d");
+            mapFieldParams.put("NATIONALID", "f");
+            mapWightParams.put("NAME", 0.7);
+            mapWightParams.put("COUNTRY", 0.1);
+            mapWightParams.put("PASSPORTID", 0.1);
+            mapWightParams.put("NATIONALID", 0.1);
+            Map<String, Object> documentSearch = iesService.documentSearch("index", "wcoIndex", mapFieldParams, mapWightParams, 1, 10);
             logger.debug(LogUtils.format("R", documentSearch));
         } catch (Exception e) {
             e.printStackTrace();

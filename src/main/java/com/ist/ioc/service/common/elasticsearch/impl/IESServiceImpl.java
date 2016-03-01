@@ -9,8 +9,6 @@ import static com.ist.ioc.service.common.Constants.ES_SCORE_MATCH_SLOP_2;
 import static com.ist.ioc.service.common.Constants.ES_SCORE_MATCH_SLOP_3;
 import static com.ist.ioc.service.common.Constants.ES_SCORE_NOT_MUST_MATCH;
 import static com.ist.ioc.service.common.Constants.ES_SCORE_PERFECT_MATCH;
-import io.searchbox.core.SearchResult;
-import io.searchbox.core.Search.Builder;
 
 import java.io.File;
 import java.io.IOException;
@@ -32,7 +30,6 @@ import org.elasticsearch.index.query.FuzzyQueryBuilder;
 import org.elasticsearch.index.query.MatchAllQueryBuilder;
 import org.elasticsearch.index.query.MatchQueryBuilder;
 import org.elasticsearch.index.query.MultiMatchQueryBuilder;
-import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryStringQueryBuilder;
 import org.elasticsearch.index.query.TermQueryBuilder;
 import org.elasticsearch.index.query.WildcardQueryBuilder;
@@ -568,6 +565,43 @@ public class IESServiceImpl extends AbstractIESService {
             List<String> hlFields = buildFieldList();
             
             return this.documentSearch(indexName, indexType, boolQueryBuilder, true, hlFields , similarityFields, mapFieldParams, Pagination.cpn(pageNow), Pagination.cps(pageSize));
+        } catch (IOException e) {
+            logger.error(
+                    "搜索失败"
+                            + LogUtils.format("indexNames", indexName, "indexTypes", indexType), e);
+            throw new IOException("搜索失败", e);
+        }
+    }
+    
+    public Map<String, Object> documentSearch(String indexName, String indexType, Map<String, Object> mapFieldParams, Map<String, Object> mapWeightParams, Integer pageNow,
+            Integer pageSize) throws IOException {
+        try {
+            if (logger.isDebugEnabled()) {
+                logger.debug("requestParams:"
+                        + LogUtils.format("indexName", indexName, "indexType", indexType));
+            }
+            List<String> subFields = buildSubFields();
+            BoolQueryBuilder boolQueryBuilder = this.boolQueryBuilder();
+            for(Map.Entry<String, Object> entry : mapFieldParams.entrySet()){
+                QueryStringQueryBuilder queryStringBuilder = this.queryStringBuilder(String.valueOf(entry.getValue()), buildFields(entry.getKey(), subFields));
+                if("NAME".equals(entry.getKey()) && entry.getValue() != null && StringUtils.isNotBlank((String)entry.getValue())){
+                    WildcardQueryBuilder nameWildcardBuilder = this.wildcardBuilder("NAME.prototype", String.valueOf(entry.getValue()));
+                    boolQueryBuilder.should(nameWildcardBuilder);
+                }
+                if("COUNTRY".equals(entry.getKey()) && entry.getValue() != null && StringUtils.isNotBlank((String)entry.getValue())){
+                    WildcardQueryBuilder countryWildcardBuilder = this.wildcardBuilder("COUNTRY.prototype", String.valueOf(entry.getValue()));
+                    boolQueryBuilder.should(countryWildcardBuilder);
+                }
+                boolQueryBuilder.should(queryStringBuilder);
+            }
+            List<String> similarityFields = new ArrayList<String>();
+            similarityFields.add("NAME");
+            similarityFields.add("COUNTRY");
+            similarityFields.add("PASSPORTID");
+            similarityFields.add("NATIONALID");
+            List<String> hlFields = buildFieldList();
+            
+            return this.documentSearch(indexName, indexType, boolQueryBuilder, true, hlFields , similarityFields, mapFieldParams, mapWeightParams, Pagination.cpn(pageNow), Pagination.cps(pageSize));
         } catch (IOException e) {
             logger.error(
                     "搜索失败"
