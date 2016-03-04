@@ -10,7 +10,15 @@ public class Formats {
 	}
 	
 	public static void main(String[] args) {
-		System.out.println(formatMoney(new BigDecimal("0.42105263157894735").multiply(new BigDecimal(100))));
+		System.out.println(formatDigital(0.11111111221211111111111111111111111111111));
+	}
+	
+	public static double formatDigital(double digital){
+	    BigDecimal bigDecimal = new BigDecimal(digital);
+	    BigDecimal bigDecimal2 = new BigDecimal(100);
+	    BigDecimal multiply = bigDecimal.multiply(bigDecimal2);
+	    BigDecimal formatDigital = formatMoney(multiply);
+	    return formatDigital.doubleValue();
 	}
 
 }

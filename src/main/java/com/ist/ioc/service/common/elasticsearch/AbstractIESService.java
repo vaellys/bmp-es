@@ -1744,28 +1744,28 @@ public abstract class AbstractIESService implements IESService {
             List<String> nameRaw = highlight.get("NAME.raw");
             
             if (null != namePyNone && namePyNone.get(0).indexOf(ES_BEGIN_TAG)> -1 && namePyNone.get(0).indexOf(ES_END_TAG) > -1) {
-                setSimilarity(mapFieldParams, mapWeightParams, source, PyOther.pyNone);
+                setSimilarity(mapFieldParams, mapWeightParams, source, PyOther.pyNone, "NAME");
                 source.put("NAME", namePyNone.get(0));
             }else if(null != namePyOnly && namePyOnly.get(0).indexOf(ES_BEGIN_TAG)> -1 && namePyOnly.get(0).indexOf(ES_END_TAG) > -1){
-                setSimilarity(mapFieldParams, mapWeightParams, source, PyOther.pyOnly);
+                setSimilarity(mapFieldParams, mapWeightParams, source, PyOther.pyOnly, "NAME");
                 source.put("NAME", namePyOnly.get(0));
             }else if(null != nameEn && nameEn.get(0).indexOf(ES_BEGIN_TAG)> -1 && nameEn.get(0).indexOf(ES_END_TAG) > -1) {
-                setSimilarity(mapFieldParams, mapWeightParams, source, PyOther.other);
+                setSimilarity(mapFieldParams, mapWeightParams, source, PyOther.other, "NAME");
                 source.put("NAME", nameEn.get(0));
             }else if(null != namePrototype && namePrototype.get(0).indexOf(ES_BEGIN_TAG)> -1 && namePrototype.get(0).indexOf(ES_END_TAG) > -1) {
-                setSimilarity(mapFieldParams, mapWeightParams, source, PyOther.other);
+                setSimilarity(mapFieldParams, mapWeightParams, source, PyOther.other, "NAME");
                 source.put("NAME", namePrototype.get(0));
             }else if (null != nameT2S && nameT2S.get(0).indexOf(ES_BEGIN_TAG)> -1 && nameT2S.get(0).indexOf(ES_END_TAG) > -1) {
-                setSimilarity(mapFieldParams, mapWeightParams, source, PyOther.other);
+                setSimilarity(mapFieldParams, mapWeightParams, source, PyOther.other, "NAME");
                 source.put("NAME", nameT2S.get(0));
             }else if (null != nameRussian && nameRussian.get(0).indexOf(ES_BEGIN_TAG)> -1 && nameRussian.get(0).indexOf(ES_END_TAG) > -1) {
-                setSimilarity(mapFieldParams, mapWeightParams, source, PyOther.other);
+                setSimilarity(mapFieldParams, mapWeightParams, source, PyOther.other, "NAME");
                 source.put("NAME", nameRussian.get(0));
             }else if (null != nameFrench && nameFrench.get(0).indexOf(ES_BEGIN_TAG)> -1 && nameFrench.get(0).indexOf(ES_END_TAG) > -1) {
-                setSimilarity(mapFieldParams, mapWeightParams, source, PyOther.other);
+                setSimilarity(mapFieldParams, mapWeightParams, source, PyOther.other, "NAME");
                 source.put("NAME", nameFrench.get(0));
             }else if (null != nameRaw && nameRaw.get(0).indexOf(ES_BEGIN_TAG)> -1 && nameRaw.get(0).indexOf(ES_END_TAG) > -1) {
-                setSimilarity(mapFieldParams, mapWeightParams, source, PyOther.other);
+                setSimilarity(mapFieldParams, mapWeightParams, source, PyOther.other, "NAME");
                 source.put("NAME", nameRaw.get(0));
             }
             
@@ -1779,41 +1779,41 @@ public abstract class AbstractIESService implements IESService {
             List<String> countryPrototype = highlight.get("COUNTRY.prototype");
             List<String> countryRaw = highlight.get("COUNTRY.raw");
             if (null != country && country.get(0).indexOf(ES_BEGIN_TAG)> -1 && country.get(0).indexOf(ES_END_TAG) > -1) {
-                setSimilarity(mapFieldParams, mapWeightParams, source, PyOther.other);
+                setSimilarity(mapFieldParams, mapWeightParams, source, PyOther.other, "COUNTRY");
                 source.put("COUNTRY", country.get(0));
             }else if (null != countryPyNone && countryPyNone.get(0).indexOf(ES_BEGIN_TAG)> -1 && countryPyNone.get(0).indexOf(ES_END_TAG) > -1) {
-                setSimilarity(mapFieldParams, mapWeightParams, source, PyOther.pyNone);
+                setSimilarity(mapFieldParams, mapWeightParams, source, PyOther.pyNone, "COUNTRY");
                 source.put("COUNTRY", countryPyNone.get(0));
             }else if(null != countryPyOnly && countryPyOnly.get(0).indexOf(ES_BEGIN_TAG)> -1 && countryPyOnly.get(0).indexOf(ES_END_TAG) > -1){
-                setSimilarity(mapFieldParams, mapWeightParams, source, PyOther.pyOnly);
+                setSimilarity(mapFieldParams, mapWeightParams, source, PyOther.pyOnly, "COUNTRY");
                 source.put("COUNTRY", countryPyOnly.get(0));
             }else if(null != countryEn && countryEn.get(0).indexOf(ES_BEGIN_TAG)> -1 && countryEn.get(0).indexOf(ES_END_TAG) > -1) {
-                setSimilarity(mapFieldParams, mapWeightParams, source, PyOther.other);
+                setSimilarity(mapFieldParams, mapWeightParams, source, PyOther.other, "COUNTRY");
                 source.put("COUNTRY", countryEn.get(0));
             }else if(null != countryPrototype && countryPrototype.get(0).indexOf(ES_BEGIN_TAG)> -1 && countryPrototype.get(0).indexOf(ES_END_TAG) > -1) {
-                setSimilarity(mapFieldParams, mapWeightParams, source, PyOther.other);
+                setSimilarity(mapFieldParams, mapWeightParams, source, PyOther.other, "COUNTRY");
                 source.put("COUNTRY", countryPrototype.get(0));
             }else if (null != countryT2S && countryT2S.get(0).indexOf(ES_BEGIN_TAG)> -1 && countryT2S.get(0).indexOf(ES_END_TAG) > -1) {
-                setSimilarity(mapFieldParams, mapWeightParams, source, PyOther.other);
+                setSimilarity(mapFieldParams, mapWeightParams, source, PyOther.other, "COUNTRY");
                 source.put("COUNTRY", countryT2S.get(0));
             }else if (null != countryRussian && countryRussian.get(0).indexOf(ES_BEGIN_TAG)> -1 && countryRussian.get(0).indexOf(ES_END_TAG) > -1) {
-                setSimilarity(mapFieldParams, mapWeightParams, source, PyOther.other);
+                setSimilarity(mapFieldParams, mapWeightParams, source, PyOther.other, "COUNTRY");
                 source.put("COUNTRY", countryRussian.get(0));
             }else if (null != countryFrench && countryFrench.get(0).indexOf(ES_BEGIN_TAG)> -1 && countryFrench.get(0).indexOf(ES_END_TAG) > -1) {
-                setSimilarity(mapFieldParams, mapWeightParams, source, PyOther.other);
+                setSimilarity(mapFieldParams, mapWeightParams, source, PyOther.other, "COUNTRY");
                 source.put("COUNTRY", countryFrench.get(0));
             }else if (null != countryRaw && countryRaw.get(0).indexOf(ES_BEGIN_TAG)> -1 && countryRaw.get(0).indexOf(ES_END_TAG) > -1) {
-                setSimilarity(mapFieldParams, mapWeightParams, source, PyOther.other);
+                setSimilarity(mapFieldParams, mapWeightParams, source, PyOther.other, "COUNTRY");
                 source.put("COUNTRY", countryRaw.get(0));
             }
             List<String> nationalid = highlight.get("NATIONALID");
             if (null != nationalid && nationalid.get(0).indexOf(ES_BEGIN_TAG)> -1 && nationalid.get(0).indexOf(ES_END_TAG) > -1) {
-                setSimilarity(mapFieldParams, mapWeightParams, source, PyOther.other);
+                setSimilarity(mapFieldParams, mapWeightParams, source, PyOther.other, "NATIONALID");
                 source.put("NATIONALID", nationalid.get(0));
             }
             List<String> passportid = highlight.get("PASSPORTID");
             if (null != passportid && passportid.get(0).indexOf(ES_BEGIN_TAG)> -1 && passportid.get(0).indexOf(ES_END_TAG) > -1) {
-                setSimilarity(mapFieldParams, mapWeightParams, source, PyOther.other);
+                setSimilarity(mapFieldParams, mapWeightParams, source, PyOther.other, "PASSPORTID");
                 source.put("PASSPORTID", passportid.get(0));
             }
         }
@@ -1821,7 +1821,7 @@ public abstract class AbstractIESService implements IESService {
     }
 
     @SuppressWarnings("rawtypes")
-    private void setSimilarity(Map<String, Object> mapFieldParams, Map<String, Object> mapWeightParams, Map<String, Object> source, Enum pyOther) {
+    private void setSimilarity(Map<String, Object> mapFieldParams, Map<String, Object> mapWeightParams, Map<String, Object> source, Enum pyOther, String field) {
         //每个字段的相似度与权重
         Map<Double, Double> simWeightMap = new HashMap<Double, Double>();
         //动态分配比例
@@ -1831,26 +1831,28 @@ public abstract class AbstractIESService implements IESService {
         for (Map.Entry<String, Object> entry : mapFieldParams.entrySet()) {
             String src = (String) entry.getValue();
             for (Map.Entry<String, Object> entryTarget : source.entrySet()) {
-                Object value = entry.getValue();
                 if(entry.getKey().equals(entryTarget.getKey())){
-                   if(StringUtils.isEmpty(value == null ? "" : String.valueOf(value))){
+                   if(StringUtils.isEmpty(src == null ? "" : String.valueOf(src))){
                        isFull = false;
                        break;
                    } else {
                        String tar = (String) entryTarget.getValue();
                        double similarity = 0.0;
-                       if(PyOther.pyNone.equals(pyOther)){
-                           String chinieseToPinyin = PinYin4jUtils.chinieseToPinyin(tar);
-                           similarity = getSimilarity(src, chinieseToPinyin);
-                       }else if(PyOther.pyOnly.equals(pyOther)){
-                           String chinieseToPinyin = PinYin4jUtils.getPinYinHeadChar(tar);
-                           similarity = getSimilarity(src, chinieseToPinyin);
-                       }else if(PyOther.other.equals(pyOther)){
-                           similarity = getSimilarity(src, tar);
-                       }
                        Double weight = Double.valueOf(String.valueOf(mapWeightParams.get(entry.getKey())));
                        divider += weight*10;
-                       simWeightMap.put(similarity, weight);
+                       if(field.equals(entry.getKey())){
+                           if(PyOther.pyNone.equals(pyOther)){
+                               String chinieseToPinyin = PinYin4jUtils.chinieseToPinyin(tar);
+                               similarity = getSimilarity(src.toLowerCase(), chinieseToPinyin.toLowerCase());
+                           }else if(PyOther.pyOnly.equals(pyOther)){
+                               String chinieseToPinyin = PinYin4jUtils.getPinYinHeadChar(tar);
+                               similarity = getSimilarity(src.toLowerCase(), chinieseToPinyin.toLowerCase());
+                           }else if(PyOther.other.equals(pyOther)){
+                               similarity = getSimilarity(src.toLowerCase(), tar.toLowerCase());
+                           }
+                           simWeightMap.put(similarity, weight);
+                       }
+                       break;
                    }
                 }
             }
@@ -1864,10 +1866,12 @@ public abstract class AbstractIESService implements IESService {
             if(isFull){
                 totalSim += key * value;
             }else {
-                totalSim += key * (value / divider);
+                totalSim += key * ((value*10) / divider);
             }
         }
-        source.put("MATCHING_DEGREE", totalSim);
+        Object object = source.get("MATCHING_DEGREE");
+        double similarity = object == null ? 0.0 : Double.valueOf(String.valueOf(object)); 
+        source.put("MATCHING_DEGREE", similarity + totalSim);
     }
     
     enum PyOther {

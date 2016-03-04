@@ -14,6 +14,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.ist.dto.bmp.ESDto;
+
 public class CollectionUtils {
     private CollectionUtils() {
     }
@@ -141,4 +143,14 @@ public class CollectionUtils {
         }  
         return obj;
     }  
+    
+    public static void main(String[] args) {
+        Map<String, String> m = new HashMap<String, String>();
+        m.put("id", "1111");
+        m.put("title", "您好");
+        m.put("content", "sb");
+        ESDto convertMap = (ESDto) convertMap(ESDto.class, m);
+        System.out.println(convertMap);
+        
+    }
 }

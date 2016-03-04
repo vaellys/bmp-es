@@ -7,7 +7,7 @@ import com.ist.common.es.util.SimilarityUtils;
 public class Distance {
     public static void main(String[]args){
         int a=new Distance().getDistance("Abdel-Bari, Adel Abdul Megeed","Abdel-Bari, Adel Abdul Megeed", false);
-        double similarity = SimilarityUtils.similarity("Morocco", "Egypt");
+        double similarity = SimilarityUtils.similarity("983129194310151454", "888866");
         System.out.println(similarity);
     }
     public int getDistance(char[] str1,char[] str2){

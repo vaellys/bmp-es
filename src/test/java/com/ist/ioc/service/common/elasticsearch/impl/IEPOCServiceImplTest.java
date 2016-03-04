@@ -569,14 +569,14 @@ public class IEPOCServiceImplTest extends AbstractJUnit4SpringContextTests {
         try {
             Map<String, Object> mapFieldParams = new HashMap<String, Object>();
             Map<String, Object> mapWightParams = new HashMap<String, Object>();
-            mapFieldParams.put("NAME", "Abdel-Bari, Adel Abdul Megeed");
-            mapFieldParams.put("COUNTRY", "Egypt");
-            mapFieldParams.put("PASSPORTID", "d");
-            mapFieldParams.put("NATIONALID", "f");
-            mapWightParams.put("NAME", 0.7);
+            mapFieldParams.put("NAME", "");
+            mapFieldParams.put("COUNTRY", "");
+            mapFieldParams.put("PASSPORTID", "9826011921011500");
+            mapFieldParams.put("NATIONALID", "");
+            mapWightParams.put("NAME", 0.2);
             mapWightParams.put("COUNTRY", 0.1);
-            mapWightParams.put("PASSPORTID", 0.1);
-            mapWightParams.put("NATIONALID", 0.1);
+            mapWightParams.put("PASSPORTID", 0.4);
+            mapWightParams.put("NATIONALID", 0.3);
             Map<String, Object> documentSearch = iesService.documentSearch("index", "wcoIndex", mapFieldParams, mapWightParams, 1, 10);
             logger.debug(LogUtils.format("R", documentSearch));
         } catch (Exception e) {

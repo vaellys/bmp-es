@@ -592,6 +592,14 @@ public class IESServiceImpl extends AbstractIESService {
                     WildcardQueryBuilder countryWildcardBuilder = this.wildcardBuilder("COUNTRY.prototype", String.valueOf(entry.getValue()));
                     boolQueryBuilder.should(countryWildcardBuilder);
                 }
+                if("PASSPORTID".equals(entry.getKey()) && entry.getValue() != null && StringUtils.isNotBlank((String)entry.getValue())){
+                    WildcardQueryBuilder nameWildcardBuilder = this.wildcardBuilder("PASSPORTID", String.valueOf(entry.getValue()));
+                    boolQueryBuilder.should(nameWildcardBuilder);
+                }
+                if("NATIONALID".equals(entry.getKey()) && entry.getValue() != null && StringUtils.isNotBlank((String)entry.getValue())){
+                    WildcardQueryBuilder countryWildcardBuilder = this.wildcardBuilder("NATIONALID", String.valueOf(entry.getValue()));
+                    boolQueryBuilder.should(countryWildcardBuilder);
+                }
                 boolQueryBuilder.should(queryStringBuilder);
             }
             List<String> similarityFields = new ArrayList<String>();
