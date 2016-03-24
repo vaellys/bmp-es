@@ -712,8 +712,9 @@ public abstract class AbstractIESService implements IESService {
             List<String> similarityFields, String keywords, Integer pageNow, Integer pageSize) throws IOException {
         try {
             Builder builder = getSearchBuilder(queryQuery, isHighlight, hlFields);
-            // 构建搜索
+            // 执行搜索
             SearchResult result = searchResultExecute(indexName, indexType, builder);
+            //处理查询结果集
             Map<String, Object> resultMap = searchResultHandler(result, similarityFields, keywords, pageNow, pageSize);
             logger.debug("--------------------------------结果--------------------------" + LogUtils.format("r", resultMap));
             return resultMap;
@@ -754,11 +755,12 @@ public abstract class AbstractIESService implements IESService {
     }
     
     protected Map<String, Object> documentSearch(String indexName, String indexType, QueryBuilder queryQuery, Boolean isHighlight, List<String> hlFields,
-            List<String> similarityFields, Map<String, Object> mapFieldParams, Map<String, Object> mapWeightParams, Integer pageNow, Integer pageSize) throws IOException {
+             Map<String, Object> mapFieldParams, Map<String, Object> mapWeightParams, Integer pageNow, Integer pageSize) throws IOException {
         try {
             Builder builder = getSearchBuilder(queryQuery, isHighlight, hlFields);
-            // 构建搜索
+            // 执行搜索
             SearchResult result = searchResultExecute(indexName, indexType, builder);
+            //对查询结果集进行处理
             Map<String, Object> resultMap = searchResultHandler(result, mapFieldParams, mapWeightParams, pageNow, pageSize);
             logger.debug("--------------------------------结果--------------------------" + LogUtils.format("r", resultMap));
             return resultMap;
@@ -946,6 +948,13 @@ public abstract class AbstractIESService implements IESService {
         return builder;
     }
     
+    /**
+     * 获取查询条件构造器
+     * @param queryQuery
+     * @param isHighlight
+     * @param hlFields
+     * @return
+     */
     protected Builder getSearchBuilder(QueryBuilder queryQuery, Boolean isHighlight, List<String> hlFields) {
         SearchSourceBuilder ssb = searchSourceBuilder.query(queryQuery);
         // 设置分页
@@ -1130,6 +1139,7 @@ public abstract class AbstractIESService implements IESService {
                 list.add(source);
             }
         }
+        //对结果进行排序 根据相似度 从高到低
         Collections.sort(list, new Comparator<Map<String, Object>>() {
             @Override
             public int compare(Map<String, Object> o1, Map<String, Object> o2) {
@@ -1144,6 +1154,7 @@ public abstract class AbstractIESService implements IESService {
                 }
             }
         });
+        //构建分页对象
         if(null != list && !list.isEmpty()){
             p = new Pagination(pageNow, pageSize, list, list.size());
         }else{
@@ -1408,6 +1419,7 @@ public abstract class AbstractIESService implements IESService {
     }
 
     private void setSimilarity(String keywords, Map<String, Object> source, String c) {
+        //计算相似度
         double similarity = SimilarityUtils.similarity(keywords, c);
         source.put("MATCHING_DEGREE", similarity);
     }
@@ -1515,7 +1527,7 @@ public abstract class AbstractIESService implements IESService {
     @SuppressWarnings({ "unchecked", "rawtypes" })
     protected Map<String, Object> getHighlightMap(Hit<Map, Void> hit, List<String> similarityFields, String keywords) {
         Map<String, Object> source = hit.source;
-        //拼接原始字段值
+        //拼接原始字段值 根据需要进行相似度计算的字段将索引库里面的字段值进行拼接
         StringBuilder sb = new StringBuilder();
         for (Map.Entry<String, Object> entry : source.entrySet()) {
             if(similarityFields.contains(entry.getKey())){
@@ -1535,13 +1547,16 @@ public abstract class AbstractIESService implements IESService {
             List<String> namePrototype = highlight.get("NAME.prototype");
             List<String> nameRaw = highlight.get("NAME.raw");
             if (null != nameRaw && nameRaw.get(0).indexOf(ES_BEGIN_TAG)> -1 && nameRaw.get(0).indexOf(ES_END_TAG) > -1) {
+                //设置相似度
                 setSimilarity(keywords, source, sb.toString());
                 source.put("NAME", nameRaw.get(0));
             }else if (null != namePyNone && namePyNone.get(0).indexOf(ES_BEGIN_TAG)> -1 && namePyNone.get(0).indexOf(ES_END_TAG) > -1) {
+                //获取原始值对应的拼音
                 String chinieseToPinyin = PinYin4jUtils.chinieseToPinyin(sb.toString());
                 setSimilarity(keywords, source, chinieseToPinyin);
                 source.put("NAME", namePyNone.get(0));
             }else if(null != namePyOnly && namePyOnly.get(0).indexOf(ES_BEGIN_TAG)> -1 && namePyOnly.get(0).indexOf(ES_END_TAG) > -1){
+                //获取原始值对应的拼音首字母
                 String chinieseToPinyin = PinYin4jUtils.getPinYinHeadChar(sb.toString());
                 setSimilarity(keywords, source, chinieseToPinyin);
                 source.put("NAME", namePyOnly.get(0));
@@ -1744,6 +1759,7 @@ public abstract class AbstractIESService implements IESService {
             List<String> nameRaw = highlight.get("NAME.raw");
             
             if (null != namePyNone && namePyNone.get(0).indexOf(ES_BEGIN_TAG)> -1 && namePyNone.get(0).indexOf(ES_END_TAG) > -1) {
+                //计算相似度
                 setSimilarity(mapFieldParams, mapWeightParams, source, PyOther.pyNone, "NAME");
                 source.put("NAME", namePyNone.get(0));
             }else if(null != namePyOnly && namePyOnly.get(0).indexOf(ES_BEGIN_TAG)> -1 && namePyOnly.get(0).indexOf(ES_END_TAG) > -1){
@@ -1829,15 +1845,19 @@ public abstract class AbstractIESService implements IESService {
         //是否所有字段都存在
         boolean isFull = true;
         for (Map.Entry<String, Object> entry : mapFieldParams.entrySet()) {
+            //获取查询字段的值
             String src = (String) entry.getValue();
             for (Map.Entry<String, Object> entryTarget : source.entrySet()) {
+                //判断查询字段和索引库的字段是否相同
                 if(entry.getKey().equals(entryTarget.getKey())){
+                    //判断查询字段值是否为空
                    if(StringUtils.isEmpty(src == null ? "" : String.valueOf(src))){
                        isFull = false;
                        break;
                    } else {
                        String tar = (String) entryTarget.getValue();
                        double similarity = 0.0;
+                       //获取权重
                        Double weight = Double.valueOf(String.valueOf(mapWeightParams.get(entry.getKey())));
                        divider += weight*10;
                        if(field.equals(entry.getKey())){

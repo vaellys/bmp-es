@@ -192,6 +192,17 @@ public interface IESService {
     public Map<String, Object> documentSearch(String indexName, String indexType, Map<String, Object> mapFieldParams, Integer pageNow, Integer pageSize)
             throws IOException;
 
+    /**
+     * 根据多个字段进行查询，并按照每个字段的权重进行匹配度的计算
+     * @param indexName 索引库的名字
+     * @param indexType 索引类型
+     * @param mapFieldParams 多个字段与相应的value
+     * @param mapWeightParams 字段的权重
+     * @param pageNow 当前页
+     * @param pageSize 页大小
+     * @return
+     * @throws IOException
+     */
     public Map<String, Object> documentSearch(String indexName, String indexType, Map<String, Object> mapFieldParams, Map<String, Object> mapWeightParams,
             Integer pageNow, Integer pageSize) throws IOException;
 

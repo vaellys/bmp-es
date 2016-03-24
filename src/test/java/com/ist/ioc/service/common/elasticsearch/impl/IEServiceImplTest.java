@@ -58,7 +58,7 @@ public class IEServiceImplTest extends AbstractJUnit4SpringContextTests {
         try {
             List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
                 Map<String, Object> map = new HashMap<String, Object>();
-                map.put("id", 1);
+                map.put("NAME", 1);
                 map.put("title", "张三 李四 王五 章三");
                 String content = "张三 李四 Beijing china";
                 map.put("content", content);

@@ -1,6 +1,6 @@
 package com.ist.ioc.service.common.elasticsearch.impl;
 
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -147,7 +147,7 @@ public class IEPOCServiceImplTest extends AbstractJUnit4SpringContextTests {
     @Test
     public void testDocumentSearch2() {
         try {
-            String keywords = "982601192101150015测测个CHN982601192101150015";
+            String keywords = "刘兴";
             Map<String, Object> documentSearch = iesService.documentSearch("index", "wcoIndex", keywords, 1, 10);
             logger.debug(LogUtils.format("R", documentSearch));
         } catch (Exception e) {
@@ -156,6 +156,9 @@ public class IEPOCServiceImplTest extends AbstractJUnit4SpringContextTests {
         }
     }
     
+    /**
+     * 全拼搜索
+     */
     @Test
     public void testDocumentSearchWithPyNone() {
         try {
@@ -190,6 +193,9 @@ public class IEPOCServiceImplTest extends AbstractJUnit4SpringContextTests {
         }
     }
 
+    /**
+     * 中文搜索
+     */
     @Test
     public void testDocumentSearchWithCN() {
         try {
@@ -215,6 +221,9 @@ public class IEPOCServiceImplTest extends AbstractJUnit4SpringContextTests {
         }
     }
 
+    /**
+     * 英文搜索
+     */
     @Test
     public void testDocumentSearchWithEN() {
         try {
@@ -241,6 +250,9 @@ public class IEPOCServiceImplTest extends AbstractJUnit4SpringContextTests {
         }
     }
 
+    /**
+     * 传统转化为简体
+     */
     @Test
     public void testDocumentHandlerWithTS() {
 
@@ -369,24 +381,7 @@ public class IEPOCServiceImplTest extends AbstractJUnit4SpringContextTests {
         }
     }
 
-    @Test
-    public void testDocumentHandlerWithRussian() {
-
-        try {
-            List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
-            Map<String, Object> map = new HashMap<String, Object>();
-            map.put("id", 2324221);
-            map.put("title", "Мы все китайцы");
-            String content = "Мы все китайцы";
-            map.put("content", content);
-            Map<String, Object> map1 = new HashMap<String, Object>();
-            list.add(map);
-            iesService.documentHandler("russian", "iphone", list, 1);
-        } catch (Exception e) {
-            e.printStackTrace();
-            fail("----------构建索引失败----------");
-        }
-    }
+   
 
     @Test
     public void testDocumentSearchWithRussian() {
@@ -412,24 +407,7 @@ public class IEPOCServiceImplTest extends AbstractJUnit4SpringContextTests {
         }
     }
 
-    @Test
-    public void testDocumentHandlerWithFrench() {
-
-        try {
-            List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
-            Map<String, Object> map = new HashMap<String, Object>();
-            map.put("id", 2324221);
-            map.put("title", "La République populaire de Chine");
-            String content = "La République populaire de Chine";
-            map.put("content", content);
-            Map<String, Object> map1 = new HashMap<String, Object>();
-            list.add(map);
-            iesService.documentHandler("french", "iphone", list, 1);
-        } catch (Exception e) {
-            e.printStackTrace();
-            fail("----------构建索引失败----------");
-        }
-    }
+   
 
     @Test
     public void testDocumentSearchWithFrench() {
@@ -584,5 +562,264 @@ public class IEPOCServiceImplTest extends AbstractJUnit4SpringContextTests {
             fail("----------构建索引失败----------");
         }
     }
+    
+    
+    
+    
+    
+    
+    
+    /**
+     * 索引中文
+     */
+    @Test
+    public void testDocumentHandlerWithCN() {
+        try {
+            List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
+                Map<String, Object> map = new HashMap<String, Object>();
+                map.put("ENT_ID", 1);
+                map.put("NAME", "张三 李四");
+                map.put("PASSPORTID", "88886");
+                map.put("NATIONALID", "8888886");
+                String content = "法国";
+                map.put("COUNTRY", content);
+                list.add(map);
+            iesService.documentHandler("index", "wcoIndex", list, 1);
+        } catch (Exception e) {
+            e.printStackTrace();
+            fail("----------构建索引失败----------");
+        }
+    }
+    
+    /**
+     * 传统转化为简体
+     */
+    @Test
+    public void testDocumentHandlerWithTs() {
+        try {
+            List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
+            Map<String, Object> map = new HashMap<String, Object>();
+            map.put("ENT_ID", 2);
+            map.put("NAME", "张三");
+            map.put("PASSPORTID", "88886");
+            map.put("NATIONALID", "8888886");
+            String content = "北京時間";
+            map.put("COUNTRY", content);
+            list.add(map);
+            iesService.documentHandler("index", "wcoIndex", list, 1);
+        } catch (Exception e) {
+            e.printStackTrace();
+            fail("----------构建索引失败----------");
+        }
+    }
+    
+    /**
+     * 索引俄文
+     */
+    @Test
+    public void testDocumentHandlerWithRussian() {
+        try {
+            List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
+            Map<String, Object> map = new HashMap<String, Object>();
+            map.put("ENT_ID", 3);
+            map.put("NAME", "Мы все китайцы");
+            String content = "Мы все китайцы";
+            map.put("COUNTRY", content);
+            list.add(map);
+            iesService.documentHandler("index", "wcoIndex", list, 1);
+        } catch (Exception e) {
+            e.printStackTrace();
+            fail("----------构建索引失败----------");
+        }
+    }
+    
+    /**
+     * 索引法文
+     */
+    @Test
+    public void testDocumentHandlerWithFrench() {
+        try {
+            List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
+            Map<String, Object> map = new HashMap<String, Object>();
+            map.put("ENT_ID", 4);
+            map.put("NAME", "La République populaire de Chine");
+            String content = "La République populaire de Chine";
+            map.put("COUNTRY", content);
+            list.add(map);
+            iesService.documentHandler("index", "wcoIndex", list, 1);
+        } catch (Exception e) {
+            e.printStackTrace();
+            fail("----------构建索引失败----------");
+        }
+    }
+    
+    /**
+     * 索引英文
+     */
+    @Test
+    public void testDocumentHandlerWithEN() {
+        try {
+            List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
+                Map<String, Object> map = new HashMap<String, Object>();
+                map.put("ENT_ID", 5);
+                map.put("NAME", "Easy amazing, fast, native mobile app development using Java™ for all platforms See the codenameone subdir for client and example code.");
+                map.put("PASSPORTID", "88886");
+                map.put("NATIONALID", "8888886");
+                String content = "Easy amazing, fast, native mobile app development using Java™ for all platforms See the codenameone subdir for client and example code.";
+                map.put("COUNTRY", content);
+                list.add(map);
+            iesService.documentHandler("index", "wcoIndex", list, 1);
+        } catch (Exception e) {
+            e.printStackTrace();
+            fail("----------构建索引失败----------");
+        }
+    }
+    
+    /**
+     * 全文搜索
+     */
+    @Test
+    public void testDocumentSearchWithFullText() {
+        try {
+            String keywords = "张三";
+            Map<String, Object> documentSearch = iesService.documentSearch("index", "wcoIndex", keywords, 1, 10);
+            logger.debug(LogUtils.format("R", documentSearch));
+        } catch (Exception e) {
+            e.printStackTrace();
+            fail("----------构建索引失败----------");
+        }
+    }
+    
+    /**
+     * 拼音搜索(全拼)
+     */
+    @Test
+    public void testDocumentSearchWithPyNone2() {
+        try {
+            String keywords = "zhangsan";
+            Map<String, Object> documentSearch = iesService.documentSearch("index", "wcoIndex", keywords, 1, 10);
+            logger.debug(LogUtils.format("R", documentSearch));
+        } catch (Exception e) {
+            e.printStackTrace();
+            fail("----------构建索引失败----------");
+        }
+    }
+    
+    /**
+     * 拼音搜索(简写)
+     */
+    @Test
+    public void testDocumentSearchWithPyOnly() {
+        try {
+            String keywords = "zs";
+            Map<String, Object> documentSearch = iesService.documentSearch("index", "wcoIndex", keywords, 1, 10);
+            logger.debug(LogUtils.format("R", documentSearch));
+        } catch (Exception e) {
+            e.printStackTrace();
+            fail("----------构建索引失败----------");
+        }
+    }
+    
+    /**
+     * 英文搜索
+     */
+    @Test
+    public void testDocumentSearchWithEN2() {
+        try {
+            String keywords = "Java";
+            Map<String, Object> documentSearch = iesService.documentSearch("index", "wcoIndex", keywords, 1, 10);
+            logger.debug(LogUtils.format("R", documentSearch));
+        } catch (Exception e) {
+            e.printStackTrace();
+            fail("----------构建索引失败----------");
+        }
+    }
+    
+    /**
+     * 俄文搜索
+     */
+    @Test
+    public void testDocumentSearchWithRussian2() {
+        try {
+            String keywords = "Мы все китайцы";
+            Map<String, Object> documentSearch = iesService.documentSearch("index", "wcoIndex", keywords, 1, 10);
+            logger.debug(LogUtils.format("R", documentSearch));
+        } catch (Exception e) {
+            e.printStackTrace();
+            fail("----------构建索引失败----------");
+        }
+    }
+    
+    /**
+     * 法文搜索
+     */
+    @Test
+    public void testDocumentSearchWithFrench2() {
+        try {
+            String keywords = "République";
+            Map<String, Object> documentSearch = iesService.documentSearch("index", "wcoIndex", keywords, 1, 10);
+            logger.debug(LogUtils.format("R", documentSearch));
+        } catch (Exception e) {
+            e.printStackTrace();
+            fail("----------构建索引失败----------");
+        }
+    }
+    
+    /**
+     * 繁体搜索
+     */
+    @Test
+    public void testDocumentSearchWithTS2() {
+        try {
+            String keywords = "时间";
+            Map<String, Object> documentSearch = iesService.documentSearch("index", "wcoIndex", keywords, 1, 10);
+            logger.debug(LogUtils.format("R", documentSearch));
+        } catch (Exception e) {
+            e.printStackTrace();
+            fail("----------构建索引失败----------");
+        }
+    }
+    
+    /**
+     * 多个字段的全文搜索
+     */
+    @Test
+    public void testDocumentSearchWithMultiFieldBackWeight() {
+        try {
+            Map<String, Object> mapFieldParams = new HashMap<String, Object>();
+            Map<String, Object> mapWightParams = new HashMap<String, Object>();
+            mapFieldParams.put("NAME", "张三");
+            mapFieldParams.put("COUNTRY", "");
+            mapFieldParams.put("PASSPORTID", "");
+            mapFieldParams.put("NATIONALID", "");
+            mapWightParams.put("NAME", 0.2);
+            mapWightParams.put("COUNTRY", 0.1);
+            mapWightParams.put("PASSPORTID", 0.4);
+            mapWightParams.put("NATIONALID", 0.3);
+            Map<String, Object> documentSearch = iesService.documentSearch("index", "wcoIndex", mapFieldParams, mapWightParams, 1, 10);
+            logger.debug(LogUtils.format("R", documentSearch));
+        } catch (Exception e) {
+            e.printStackTrace();
+            fail("----------构建索引失败----------");
+        }
+    }
+    
+    /**
+     * 删除文档
+     */
+    @Test
+    public void testDeleteDoc() {
+        try {
+           boolean deleteDoc = iesService.deleteDoc("index", "wcoIndex", "50019");
+           assertEquals(true, deleteDoc);
+        } catch (Exception e) {
+            e.printStackTrace();
+            fail("----------构建索引失败----------");
+        }
+    }
+    
+    
+    
+    
     
 }

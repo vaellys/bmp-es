@@ -485,18 +485,21 @@ public class IESServiceImpl extends AbstractIESService {
                         + LogUtils.format("indexNames", indexName, "indexTypes", indexType, "keywords", keywords, "pageNow", pageNow, "pageSize",
                                 pageSize));
             }
+            //构建查询字段
             List<String> hlFields = buildFieldList();
             BoolQueryBuilder boolQueryBuilder = this.boolQueryBuilder();
             QueryStringQueryBuilder queryStringBuilder = this.queryStringBuilder(keywords, hlFields);
 //            FuzzyQueryBuilder nameFuzzyBuilder = this.fuzzyBuilder("NAME.prototype", keywords, Fuzziness.TWO);
 //            FuzzyQueryBuilder countryFuzzyBuilder = this.fuzzyBuilder("COUNTRY.prototype", keywords, Fuzziness.TWO);
+            //构建通配符查询字段
             if(StringUtils.isNotBlank(keywords)){
                 WildcardQueryBuilder nameWildcardBuilder = this.wildcardBuilder("NAME.prototype", keywords);
                 WildcardQueryBuilder countryWildcardBuilder = this.wildcardBuilder("COUNTRY.prototype", keywords);
                 boolQueryBuilder.should(nameWildcardBuilder).should(countryWildcardBuilder);
             }
-            
+            //构建bool查询
             boolQueryBuilder.should(queryStringBuilder);
+            //需要计算相似度的所有字段 最后拼接起来
             List<String> similarityFields = new ArrayList<String>();
             similarityFields.add("NAME");
             similarityFields.add("COUNTRY");
@@ -580,10 +583,14 @@ public class IESServiceImpl extends AbstractIESService {
                 logger.debug("requestParams:"
                         + LogUtils.format("indexName", indexName, "indexType", indexType));
             }
+            //获取子级字段
             List<String> subFields = buildSubFields();
+            //构建bool查询
             BoolQueryBuilder boolQueryBuilder = this.boolQueryBuilder();
             for(Map.Entry<String, Object> entry : mapFieldParams.entrySet()){
+                //添加查询字段对应的所有分词子级字段
                 QueryStringQueryBuilder queryStringBuilder = this.queryStringBuilder(String.valueOf(entry.getValue()), buildFields(entry.getKey(), subFields));
+                //添加通配符查询需要的字段
                 if("NAME".equals(entry.getKey()) && entry.getValue() != null && StringUtils.isNotBlank((String)entry.getValue())){
                     WildcardQueryBuilder nameWildcardBuilder = this.wildcardBuilder("NAME.prototype", String.valueOf(entry.getValue()));
                     boolQueryBuilder.should(nameWildcardBuilder);
@@ -602,14 +609,9 @@ public class IESServiceImpl extends AbstractIESService {
                 }
                 boolQueryBuilder.should(queryStringBuilder);
             }
-            List<String> similarityFields = new ArrayList<String>();
-            similarityFields.add("NAME");
-            similarityFields.add("COUNTRY");
-            similarityFields.add("PASSPORTID");
-            similarityFields.add("NATIONALID");
             List<String> hlFields = buildFieldList();
             
-            return this.documentSearch(indexName, indexType, boolQueryBuilder, true, hlFields , similarityFields, mapFieldParams, mapWeightParams, Pagination.cpn(pageNow), Pagination.cps(pageSize));
+            return this.documentSearch(indexName, indexType, boolQueryBuilder, true, hlFields , mapFieldParams, mapWeightParams, Pagination.cpn(pageNow), Pagination.cps(pageSize));
         } catch (IOException e) {
             logger.error(
                     "搜索失败"
